@@ -1,0 +1,17 @@
+owner: pignon-sur-web
+repo: upptime
+sites:
+  - name: Pignon sur Web
+    url: https://pignonsurweb.be
+  - name: Démo restaurant
+    url: https://demo-restaurant.pignonsurweb.be
+  - name: Démo coiffeur
+    url: https://demo-coiffeur.pignonsurweb.be
+  - name: Démo plombier
+    url: https://demo-plombier.pignonsurweb.be
+status-website:
+  name: Parc de sites — Statut
+  cname: status.pignonsurweb.be
+  logoUrl: https://pignonsurweb.be/favicon.svg
+assignees:
+  - sachaverminck1-gif
