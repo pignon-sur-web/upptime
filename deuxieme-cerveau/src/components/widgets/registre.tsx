@@ -2,6 +2,12 @@ import type { ComponentType } from 'react'
 import { LeJour } from './LeJour'
 import { HabitudesDuJour } from './HabitudesDuJour'
 import { CourbeHabitudesWidget, MurDuMoisWidget } from './MurDuMoisWidget'
+import {
+  ProjetsEnCoursWidget,
+  RetardsWidget,
+  SeptJoursWidget,
+  TachesDuJourWidget,
+} from './TachesWidgets'
 
 /**
  * Le registre est le seul endroit où les widgets sont énumérés.
@@ -45,6 +51,10 @@ export type DefinitionWidget = {
 export const WIDGETS: readonly DefinitionWidget[] = [
   { cle: 'le_jour', libelle: 'Le jour', Composant: LeJour },
   { cle: 'habitudes_du_jour', libelle: 'Habitudes du jour', Composant: HabitudesDuJour },
+  { cle: 'taches_du_jour', libelle: "Tâches d'aujourd'hui", Composant: TachesDuJourWidget },
+  { cle: 'retards', libelle: 'En retard', Composant: RetardsWidget },
+  { cle: 'sept_jours', libelle: 'Sept prochains jours', Composant: SeptJoursWidget },
+  { cle: 'projets_en_cours', libelle: 'Projets en cours', Composant: ProjetsEnCoursWidget },
   { cle: 'mur_du_mois', libelle: 'Le mur du mois', Composant: MurDuMoisWidget },
   { cle: 'courbe_habitudes', libelle: 'Courbe des habitudes', Composant: CourbeHabitudesWidget },
 ]

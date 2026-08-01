@@ -107,15 +107,21 @@ npm run verifier            # types, lint, build
 npm run verifier:parcours   # 23 contrôles au navigateur (serveur lancé requis)
 npm run verifier:da         # rayon et ombre réellement neutralisés
 npm run verifier:sql        # migrations + logique calculée sur un Postgres jetable
+npm run verifier:csv        # analyseur CSV sur ses cas limites
 ```
 
 `verifier:sql` demande un Postgres local sur `/var/lib/pgtest:5433`. Il applique
-les neuf migrations sur une base neuve puis contrôle ce qui compte vraiment :
+les dix migrations sur une base neuve puis contrôle ce qui compte vraiment :
 qu'archiver une habitude ne réécrit pas les scores passés, qu'une tâche
 quotidienne en retard de huit jours ne produit qu'une occurrence, qu'un loyer
 mensuel né le 31 ne dérive pas, qu'un virement laisse le net mensuel inchangé,
 qu'un rapprochement de solde crée exactement l'écart, et qu'`anon` ne peut lire
 aucune table ni aucune vue.
+
+`verifier:csv` couvre l'analyseur : le point-virgule d'un export Excel
+français, une virgule enfermée dans des guillemets, un titre multiligne, le
+BOM, le 31 février refusé plutôt que replié sur le 3 mars, et le 3 avril qui ne
+doit jamais devenir le 4 mars.
 
 `verifier:parcours` couvre l'authentification — dont l'altération du cookie, qui
 est ce qui prouve que la signature HMAC est réelle — les cibles tactiles, les
@@ -130,11 +136,13 @@ redirection y ferait échouer l'installation de la PWA sans message clair).
 supabase/migrations/   0001 socle · 0002 habitudes · 0003 travail
                        0004 finances · 0005 vie · 0006 widgets
                        0007 vues · 0008 fonctions · 0009 verrouillage
+                       0010 import CSV
 src/middleware.ts      la porte : cookie signé, matcher des exceptions PWA
 src/lib/date.ts        le fuseau, source unique de « aujourd'hui »
 src/lib/donnees/       lectures, enveloppées dans cache()
 src/lib/actions/       écritures, 'use server'
 src/components/ui/     primitives : Widget, Case, Jauge, Ligne
+src/lib/csv.ts         analyseur RFC 4180, sans dépendance
 src/components/graphiques/  SVG écrits à la main, aucune librairie
 src/components/widgets/     les widgets du tableau de bord + leur registre
 ```
