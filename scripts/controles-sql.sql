@@ -414,6 +414,74 @@ begin
 end $$;
 
 -- —————————————————————————————————————————————————————————————————
+-- Budgets
+-- —————————————————————————————————————————————————————————————————
+do $$
+declare
+  v_mois      date := date_trunc('month', public.app_today())::date;
+  v_plafond   bigint;
+  v_conso     numeric;
+  v_erreur    text;
+  v_compte    uuid;
+begin
+  -- `budget_statut` se construit au-dessus de `depenses_par_categorie`, qui
+  -- n'énumère que les catégories réellement dépensées : sans écriture, la
+  -- catégorie n'existe pas et la vue ne peut rien en dire. C'est pour ça que
+  -- l'écran Budgets lit la table `budgets` et retombe sur zéro, plutôt que de
+  -- se fier à la vue seule.
+  insert into public.accounts (name) values ('Courant budgets') returning id into v_compte;
+  insert into public.transactions (account_id, date, label, amount_cents, kind, category)
+  values (v_compte, public.app_today(), 'Delhaize', -25000, 'depense', 'Courses');
+
+  -- Un plafond par défaut et un plafond du mois coexistent sur la même
+  -- catégorie : ce sont deux index uniques PARTIELS distincts.
+  insert into public.budgets (category, monthly_cap_cents, month) values ('Courses', 8000, null);
+  insert into public.budgets (category, monthly_cap_cents, month) values ('Courses', 20000, v_mois);
+
+  perform pg_temp.verifier(
+    'un plafond par défaut et un plafond mensuel coexistent',
+    (select count(*) from public.budgets where category = 'Courses') = 2
+  );
+
+  -- Et c'est bien celui du mois qui l'emporte dans la vue.
+  select plafond_cents, consommation into v_plafond, v_conso
+  from public.budget_statut
+  where category = 'Courses' and mois = v_mois;
+
+  perform pg_temp.verifier(
+    'le plafond du mois l''emporte sur le plafond par défaut',
+    v_plafond = 20000,
+    'plafond retenu : ' || coalesce(v_plafond::text, 'aucun')
+  );
+
+  -- 250 € dépensés sous un plafond de 200 € : la ligne doit basculer en
+  -- inversion dans l'interface, et c'est cette valeur qui le décide.
+  perform pg_temp.verifier(
+    'un dépassement se voit dans la consommation',
+    v_conso > 1,
+    'consommation = ' || coalesce(v_conso::text, 'null')
+  );
+
+  -- Le piège que l'action serveur contourne : ON CONFLICT ne peut pas viser
+  -- un index partiel sans en reprendre le prédicat. Ce contrôle fige la
+  -- raison pour laquelle enregistrerBudget lit avant d'écrire.
+  begin
+    insert into public.budgets (category, monthly_cap_cents, month)
+    values ('Courses', 9000, null)
+    on conflict (category) do update set monthly_cap_cents = excluded.monthly_cap_cents;
+    v_erreur := null;
+  exception when others then
+    v_erreur := sqlstate;
+  end;
+
+  perform pg_temp.verifier(
+    'ON CONFLICT (category) ne peut pas viser l''index partiel',
+    v_erreur is not null,
+    coalesce('refusé, code ' || v_erreur, 'ACCEPTÉ — l''upsert redeviendrait possible')
+  );
+end $$;
+
+-- —————————————————————————————————————————————————————————————————
 -- Verrouillage : c'est le contrôle qui compte le plus.
 -- —————————————————————————————————————————————————————————————————
 do $$
