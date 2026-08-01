@@ -1,8 +1,10 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Widget } from '@/components/ui/Widget'
 import { Jauge } from '@/components/ui/Jauge'
 import { listerObjectifs } from '@/lib/donnees/objectifs'
 import { prochainsEvenements } from '@/lib/donnees/agenda'
+import { inboxOuverte, lectureEnCours } from '@/lib/donnees/vie'
 import { aujourdhui, heure, jourDe, jourRelatif } from '@/lib/date'
 
 /**
@@ -94,6 +96,83 @@ export async function AgendaWidget() {
           )
         })}
       </ul>
+    </Widget>
+  )
+}
+
+/**
+ * La lecture en cours : couverture, titre, auteur.
+ *
+ * Un seul livre — celui qui est ouvert. Une pile à lire sur le tableau de bord
+ * n'est pas une information, c'est un reproche.
+ */
+export async function LectureEnCoursWidget() {
+  const livre = await lectureEnCours()
+  if (!livre) return null
+
+  return (
+    <Widget
+      libelle="En lecture"
+      action={
+        <Link href="/lectures" className="libelle">
+          Lectures
+        </Link>
+      }
+    >
+      <div className="flex items-start gap-3">
+        {livre.urlCouverture ? (
+          <Image
+            src={livre.urlCouverture}
+            alt=""
+            width={48}
+            height={72}
+            className="h-18 w-12 shrink-0 border border-trait object-cover"
+          />
+        ) : null}
+        <div className="min-w-0">
+          <p className="truncate text-15">{livre.titre}</p>
+          {livre.auteur ? (
+            <p className="truncate text-13 text-secondaire">{livre.auteur}</p>
+          ) : null}
+          {livre.commenceLe ? (
+            <p className="text-11 text-secondaire">
+              commencé {jourRelatif(livre.commenceLe)}
+            </p>
+          ) : null}
+        </div>
+      </div>
+    </Widget>
+  )
+}
+
+/**
+ * L'inbox, et seulement quand elle n'est pas vide.
+ *
+ * Le compte suffit : ce widget n'est pas là pour qu'on trie depuis l'accueil,
+ * il est là pour qu'on n'oublie pas qu'il y a à trier.
+ */
+export async function InboxWidget() {
+  const elements = await inboxOuverte()
+  if (elements.length === 0) return null
+
+  return (
+    <Widget
+      libelle="Inbox"
+      action={<span className="chiffres text-13">{elements.length}</span>}
+    >
+      <ul>
+        {elements.slice(0, 3).map((element) => (
+          <li
+            key={element.id}
+            className="truncate border-b border-trait py-1.5 text-13 last:border-b-0"
+          >
+            {element.contenu.split('\n')[0]}
+          </li>
+        ))}
+      </ul>
+      <Link href="/inbox" className="mt-3 block text-13 text-secondaire underline">
+        Trier
+      </Link>
     </Widget>
   )
 }

@@ -145,4 +145,6 @@ src/components/ui/     primitives : Widget, Case, Jauge, Ligne
 src/lib/csv.ts         analyseur RFC 4180, sans dépendance
 src/components/graphiques/  SVG écrits à la main, aucune librairie
 src/components/widgets/     les widgets du tableau de bord + leur registre
+src/lib/argent.ts      centimes entiers, conversion aux deux bords seulement
+src/app/(app)/reglages/export/  l'export JSON — Supabase gratuit ne sauvegarde pas
 ```

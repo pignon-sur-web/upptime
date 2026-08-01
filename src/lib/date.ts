@@ -115,6 +115,20 @@ export function instantDepuisLocal(local: string): string {
   return resultat.toISOString()
 }
 
+/**
+ * L'instant présent, au format que Postgres attend pour un `timestamptz`.
+ *
+ * Passer par ce fichier plutôt que d'écrire `new Date().toISOString()` sur
+ * place n'est pas une coquetterie : la règle ESLint qui interdit la seconde
+ * forme existe parce que c'est ainsi qu'on dérive un jour par accident. Ici on
+ * veut un instant, pas un jour — et le dire à un seul endroit rend la
+ * distinction visible.
+ */
+export function maintenant(): string {
+  const instant = new Date()
+  return instant.toISOString()
+}
+
 /** L'inverse : un instant vers la valeur d'un `<input type="datetime-local">`. */
 export function localDepuisInstant(instant: string | Date): string {
   const d = typeof instant === 'string' ? new Date(instant) : instant
