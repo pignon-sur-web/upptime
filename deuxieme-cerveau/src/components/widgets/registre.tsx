@@ -13,7 +13,12 @@ import {
   MoisEnArgentWidget,
   PaiementsAVenirWidget,
 } from './ArgentWidgets'
-import { AgendaWidget, ObjectifsEnCoursWidget } from './VieWidgets'
+import {
+  AgendaWidget,
+  InboxWidget,
+  LectureEnCoursWidget,
+  ObjectifsEnCoursWidget,
+} from './VieWidgets'
 
 /**
  * Le registre est le seul endroit où les widgets sont énumérés.
@@ -68,6 +73,8 @@ export const WIDGETS: readonly DefinitionWidget[] = [
   { cle: 'mur_du_mois', libelle: 'Le mur du mois', Composant: MurDuMoisWidget },
   { cle: 'courbe_habitudes', libelle: 'Courbe des habitudes', Composant: CourbeHabitudesWidget },
   { cle: 'agenda', libelle: 'Agenda', Composant: AgendaWidget },
+  { cle: 'lecture_en_cours', libelle: 'En lecture', Composant: LectureEnCoursWidget },
+  { cle: 'inbox', libelle: 'Inbox', Composant: InboxWidget },
 ]
 
 export const WIDGET_PAR_CLE = new Map(WIDGETS.map((w) => [w.cle, w]))
