@@ -27,9 +27,21 @@ const formatteurJour = new Intl.DateTimeFormat('en-CA', {
 
 export type Jour = string // AAAA-MM-JJ
 
+/**
+ * Le jour belge auquel appartient un instant.
+ *
+ * C'est le pendant en lecture d'`aujourdhui()` : une colonne `timestamptz`
+ * (un `done_at`, un `created_at`) revient d'UTC, et la ranger dans la bonne
+ * journée demande la même conversion. Une tâche terminée à 00h30 appartient à
+ * la journée qui vient de commencer, pas à la veille en UTC.
+ */
+export function jourDe(instant: string | Date): Jour {
+  return formatteurJour.format(typeof instant === 'string' ? new Date(instant) : instant)
+}
+
 /** Le jour courant tel que l'utilisateur le vit. */
 export function aujourdhui(): Jour {
-  return formatteurJour.format(new Date())
+  return jourDe(new Date())
 }
 
 /**

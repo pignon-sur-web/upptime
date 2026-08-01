@@ -341,6 +341,79 @@ begin
 end $$;
 
 -- —————————————————————————————————————————————————————————————————
+-- Import CSV
+-- —————————————————————————————————————————————————————————————————
+do $$
+declare
+  v_lot       uuid;
+  v_taches    integer;
+  v_projets   integer;
+  v_avant     integer;
+  v_supprimes integer;
+  v_restantes integer;
+  v_projet    text;
+  v_fait      integer;
+begin
+  select count(*) into v_avant from public.tasks;
+
+  select batch_id, nb_taches, nb_projets into v_lot, v_taches, v_projets
+  from public.importer_taches(
+    jsonb_build_array(
+      -- « Site vitrine » existe déjà : l'import doit s'y raccrocher, pas en
+      -- créer un homonyme.
+      jsonb_build_object('titre', 'Relancer le devis', 'projet', 'Site vitrine',
+                         'echeance', '2026-04-03', 'priorite', '1'),
+      -- Projet inconnu, écrit deux fois avec une casse et des espaces
+      -- différents : un seul doit naître.
+      jsonb_build_object('titre', 'Livrer la maquette', 'projet', 'Refonte du blog',
+                         'statut', 'fait'),
+      jsonb_build_object('titre', 'Choisir la police', 'projet', '  refonte DU BLOG ',
+                         'contexte', 'perso')
+    ),
+    'export-todoist.csv'
+  );
+
+  perform pg_temp.verifier(
+    'import : projet existant réutilisé, projet inconnu créé une seule fois',
+    v_taches = 3 and v_projets = 1,
+    v_taches || ' tâches, ' || v_projets || ' projet créé'
+  );
+
+  select count(*) into v_fait
+  from public.tasks where import_batch_id = v_lot and status = 'fait' and done_at is not null;
+  perform pg_temp.verifier(
+    'import : une ligne « fait » reçoit son done_at',
+    v_fait = 1,
+    'la contrainte tasks_done_at_coherent aurait rejeté le contraire'
+  );
+
+  select string_agg(distinct p.name, ' + ' order by p.name) into v_projet
+  from public.projects p
+  join public.tasks t on t.project_id = p.id
+  where t.import_batch_id = v_lot;
+  perform pg_temp.verifier(
+    'import : les deux graphies rejoignent le même projet',
+    v_projet = 'Refonte du blog + Site vitrine',
+    coalesce(v_projet, '(aucun)')
+  );
+
+  -- Annulation du lot.
+  select public.annuler_import(v_lot) into v_supprimes;
+  select count(*) into v_restantes from public.tasks;
+  perform pg_temp.verifier(
+    'annuler un lot d''import le défait entièrement',
+    v_supprimes = 3 and v_restantes = v_avant,
+    v_supprimes || ' supprimées, ' || v_restantes || ' tâches restantes'
+  );
+
+  perform pg_temp.verifier(
+    'le projet créé par l''import survit à l''annulation',
+    exists (select 1 from public.projects where name = 'Refonte du blog'),
+    'il peut déjà porter des tâches hors du lot'
+  );
+end $$;
+
+-- —————————————————————————————————————————————————————————————————
 -- Verrouillage : c'est le contrôle qui compte le plus.
 -- —————————————————————————————————————————————————————————————————
 do $$
