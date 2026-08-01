@@ -8,7 +8,7 @@
 
 create temp table resultat (nom text, ok boolean, detail text);
 
-create or replace function verifier(p_nom text, p_ok boolean, p_detail text default '')
+create or replace function pg_temp.verifier(p_nom text, p_ok boolean, p_detail text default '')
 returns void language sql as $$
   insert into resultat values (p_nom, p_ok, p_detail);
 $$;
@@ -18,7 +18,7 @@ $$;
 -- —————————————————————————————————————————————————————————————————
 do $$
 begin
-  perform verifier(
+  perform pg_temp.verifier(
     'app_today() suit Europe/Brussels',
     public.app_today() = (now() at time zone 'Europe/Brussels')::date,
     'app_today = ' || public.app_today()
@@ -54,7 +54,7 @@ begin
   update public.habits set archived_on = public.app_today() where id = h_archivee;
   select score into v_score_apres from public.score_habitude_jour where date = v_hier;
 
-  perform verifier(
+  perform pg_temp.verifier(
     'archiver une habitude ne réécrit pas les scores passés',
     v_score_avant is not distinct from v_score_apres,
     'avant ' || coalesce(v_score_avant::text, 'null') ||
@@ -78,7 +78,7 @@ begin
   select attendues, score into v_attendues, v_score
     from public.score_habitude_jour where date = v_jour;
 
-  perform verifier(
+  perform pg_temp.verifier(
     'un jour sans habitude programmée existe avec score null',
     v_attendues = 0 and v_score is null,
     'samedi ' || v_jour || ' : attendues=' || v_attendues ||
@@ -108,13 +108,13 @@ begin
   end loop;
 
   v_serie := public.serie_habitude(h);
-  perform verifier(
+  perform pg_temp.verifier(
     'une habitude en semaine ne casse pas sa série le week-end',
     v_serie >= 40,
     'série = ' || v_serie || ' jours ouvrés consécutifs'
   );
 
-  perform verifier(
+  perform pg_temp.verifier(
     'aujourd''hui non coché ne casse pas encore la série',
     public.serie_habitude(h) = v_serie,
     'la rupture se constate le lendemain, pas à minuit'
@@ -139,7 +139,7 @@ begin
    where series_id = (select series_id from public.tasks where id = t1)
      and status in ('a_faire','en_cours');
 
-  perform verifier(
+  perform pg_temp.verifier(
     'tâche quotidienne en retard de 8 jours : un seul saut',
     v_echeance = public.app_today() + 1 and v_ouvertes = 1,
     'échéance ' || v_echeance || ', ' || v_ouvertes || ' occurrence ouverte'
@@ -149,7 +149,7 @@ begin
   insert into public.tasks (title, due_date, recurrence)
     values ('Courses', public.app_today(), 'P1W') returning id into t2;
   perform public.completer_tache(t2);
-  perform verifier(
+  perform pg_temp.verifier(
     'double complétion : la seconde tape ne crée rien',
     public.completer_tache(t2) is null,
     'retour null, idempotent'
@@ -174,7 +174,7 @@ begin
     t := v_id;
   end loop;
 
-  perform verifier(
+  perform pg_temp.verifier(
     'récurrence mensuelle : pas de dérive de fin de mois',
     31 = any(v_jours) and v_jours[1] > 27,
     'jours du mois obtenus : ' || v_jours::text
@@ -207,7 +207,7 @@ begin
   select solde_cents into v_s1 from public.solde_compte where account_id = c1;
   select solde_cents into v_s2 from public.solde_compte where account_id = c2;
 
-  perform verifier(
+  perform pg_temp.verifier(
     'virement : deux jambes, somme nulle, net mensuel inchangé',
     (select count(*) from public.transactions where transfer_group_id = v_groupe) = 2
     and (select sum(amount_cents) from public.transactions where transfer_group_id = v_groupe) = 0
@@ -215,14 +215,14 @@ begin
     'net ' || v_net_avant || ' → ' || v_net_apres || ', soldes ' || v_s1 || ' / ' || v_s2
   );
 
-  perform verifier(
+  perform pg_temp.verifier(
     'virement : les soldes ont bien bougé des deux côtés',
     v_s1 = 100000 + 250000 - 8500 - 50000 and v_s2 = 500000 + 50000,
     'courant ' || v_s1 || ', épargne ' || v_s2
   );
 
   perform public.supprimer_virement(v_groupe);
-  perform verifier(
+  perform pg_temp.verifier(
     'supprimer un virement retire ses deux jambes',
     (select count(*) from public.transactions where transfer_group_id = v_groupe) = 0
   );
@@ -246,7 +246,7 @@ begin
     from public.enregistrer_ajustement(c, 10000);
   select solde_cents into v_solde from public.solde_compte where account_id = c;
 
-  perform verifier(
+  perform pg_temp.verifier(
     'rapprochement : l''écart vaut exactement la différence',
     v_calcule = -1234 and v_ecart = 11234 and v_solde = 10000,
     'calculé ' || v_calcule || ', écart ' || v_ecart || ', solde final ' || v_solde
@@ -256,14 +256,14 @@ begin
   select transaction_id, ecart_cents into v_tx, v_ecart
     from public.enregistrer_ajustement(c, 10000);
 
-  perform verifier(
+  perform pg_temp.verifier(
     'second rapprochement à vide : aucune ligne créée',
     v_ecart = 0 and v_tx is null
       and (select count(*) from public.transactions where account_id = c) = v_lignes,
     'écart ' || v_ecart || ', toujours ' || v_lignes || ' écritures'
   );
 
-  perform verifier(
+  perform pg_temp.verifier(
     'l''ajustement est exclu du net mensuel mais compté dans le solde',
     (select coalesce(sum(ajustements_cents),0) from public.finances_mensuelles) = 11234
     and (select coalesce(sum(net_cents),0) from public.finances_mensuelles
@@ -292,7 +292,7 @@ begin
     from public.depenses_par_categorie
    where category = 'restaurant' and mois = date_trunc('month', public.app_today())::date;
 
-  perform verifier(
+  perform pg_temp.verifier(
     'un mois creux se compare à 0, pas au mois d''avant',
     v_precedente = 0,
     'dépense du mois précédent rapportée : ' || v_precedente
@@ -307,7 +307,7 @@ declare p uuid; v_av numeric; o uuid; v_prog numeric;
 begin
   insert into public.projects (name) values ('Site vitrine') returning id into p;
   select avancement into v_av from public.avancement_projet where project_id = p;
-  perform verifier(
+  perform pg_temp.verifier(
     'projet sans tâche : avancement null, pas 0 %',
     v_av is null,
     'un projet neuf est indéterminé, pas à zéro'
@@ -318,7 +318,7 @@ begin
   insert into public.tasks (title, project_id) values ('B', p);
   insert into public.tasks (title, project_id, status) values ('C', p, 'annule');
   select avancement into v_av from public.avancement_projet where project_id = p;
-  perform verifier(
+  perform pg_temp.verifier(
     'les tâches annulées sortent du numérateur ET du dénominateur',
     v_av = 0.5,
     '1 faite / 2 actives = ' || v_av
@@ -329,7 +329,7 @@ begin
   insert into public.key_results (goal_id, name, start_value, current_value, target_value)
     values (o, 'Poids', 86, 82, 78);
   select progression into v_prog from public.progression_objectif where goal_id = o;
-  perform verifier(
+  perform pg_temp.verifier(
     'résultat clé décroissant : progression correcte',
     v_prog = 0.5,
     '86 → 82 sur une cible de 78 = ' || v_prog
@@ -337,7 +337,7 @@ begin
 
   insert into public.goals (name) values ('Sans résultat clé') returning id into o;
   select progression into v_prog from public.progression_objectif where goal_id = o;
-  perform verifier('objectif sans résultat clé : progression null', v_prog is null);
+  perform pg_temp.verifier('objectif sans résultat clé : progression null', v_prog is null);
 end $$;
 
 -- —————————————————————————————————————————————————————————————————
@@ -356,7 +356,7 @@ begin
       or has_table_privilege('authenticated', c.oid, 'SELECT')
     );
 
-  perform verifier(
+  perform pg_temp.verifier(
     'anon ne peut lire aucune table ni aucune vue',
     v_fuites is null,
     coalesce('LISIBLES PAR ANON : ' || v_fuites, 'aucune fuite')
@@ -374,7 +374,7 @@ begin
       (select option_value::boolean from pg_options_to_table(c.reloptions)
         where option_name = 'security_invoker'), false);
 
-  perform verifier(
+  perform pg_temp.verifier(
     'toutes les vues portent security_invoker',
     v_sans_invoker is null,
     coalesce('SANS INVOKER : ' || v_sans_invoker, 'toutes conformes')
@@ -389,7 +389,7 @@ begin
   join pg_namespace n on n.oid = c.relnamespace
   where n.nspname = 'public' and c.relkind = 'r' and not c.relrowsecurity;
 
-  perform verifier(
+  perform pg_temp.verifier(
     'toutes les tables ont la RLS activée',
     v_sans_rls is null,
     coalesce('SANS RLS : ' || v_sans_rls, 'toutes conformes')
@@ -403,7 +403,7 @@ begin
   from pg_proc p join pg_namespace n on n.oid = p.pronamespace
   where n.nspname = 'public' and p.prosecdef;
 
-  perform verifier(
+  perform pg_temp.verifier(
     'aucune fonction en SECURITY DEFINER',
     v_definer is null,
     coalesce('DEFINER : ' || v_definer, 'toutes en invoker')
