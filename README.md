@@ -16,9 +16,20 @@ Créer un projet sur [supabase.com](https://supabase.com), **région
 `eu-central-1` (Frankfurt)** — la même que le déploiement Vercel, ce qui fait
 passer chaque requête d'environ 90 ms à 4 ms.
 
-Dans l'éditeur SQL, coller le contenu de `supabase/migrations/*.sql` **dans
-l'ordre des numéros**. La migration `0009_verrouillage.sql` est la frontière de
-sécurité : ne pas la sauter.
+Appliquer les migrations, au choix :
+
+```bash
+# Automatique — jeton sur supabase.com/dashboard/account/tokens
+SUPABASE_ACCESS_TOKEN=sbp_… npm run migrer -- <ref-du-projet>
+
+# Ou produire un fichier unique à coller dans l'éditeur SQL
+node scripts/appliquer-migrations.mjs --concatener > migrations.sql
+```
+
+Le jeton `sbp_…` n'est pas la clé `service_role` : celle-ci ne donne accès
+qu'à PostgREST, qui ne sait pas exécuter de DDL. À la main, coller les fichiers
+**dans l'ordre des numéros** ; `0009_verrouillage.sql` est la frontière de
+sécurité, ne pas la sauter.
 
 Créer ensuite un bucket Storage **public** nommé `couvertures` (les images de
 couverture portent des noms UUID ; un bucket privé imposerait des URL signées
