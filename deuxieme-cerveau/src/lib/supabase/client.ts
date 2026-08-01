@@ -2,6 +2,7 @@ import 'server-only'
 
 import { createClient } from '@supabase/supabase-js'
 import { cleServiceSupabase, urlSupabase } from '@/lib/env'
+import type { Database } from './database.types'
 
 /**
  * L'unique accès à la base, et il est exclusivement serveur.
@@ -21,11 +22,11 @@ import { cleServiceSupabase, urlSupabase } from '@/lib/env'
  * importation depuis un composant client en erreur de compilation — c'est une
  * garantie de l'outil, pas une consigne.
  */
-let instance: ReturnType<typeof createClient> | null = null
+let instance: ReturnType<typeof createClient<Database>> | null = null
 
 export function supabase() {
   if (!instance) {
-    instance = createClient(urlSupabase(), cleServiceSupabase(), {
+    instance = createClient<Database>(urlSupabase(), cleServiceSupabase(), {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
