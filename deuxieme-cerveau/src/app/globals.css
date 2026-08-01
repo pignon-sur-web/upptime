@@ -1,0 +1,202 @@
+@import 'tailwindcss';
+
+/* —————————————————————————————————————————————————————————————————
+   Tokens
+
+   Six couleurs, pas une de plus. L'information est portée par le
+   remplissage en Encre, jamais par la teinte. Le mode sombre inverse
+   Encre et Papier sans recalculer quoi que ce soit — c'est possible
+   précisément parce qu'il n'y a aucune teinte à recalculer.
+   ————————————————————————————————————————————————————————————————— */
+
+:root {
+  --fond: #fbfbf9; /* Papier */
+  --texte: #0a0a0b; /* Encre — texte ET remplissage */
+  --secondaire: #75757c; /* Graphite */
+  --trait: #e6e6e2; /* Trait */
+
+  --duree: 120ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fond: #0e0e10; /* Nuit */
+    --texte: #fbfbf9;
+    --secondaire: #75757c;
+    --trait: #232327; /* Trait nuit */
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duree: 0ms;
+  }
+}
+
+/* —————————————————————————————————————————————————————————————————
+   Ce que la direction artistique interdit n'existe pas dans Tailwind.
+
+   Vider un espace de noms avec `initial` supprime les utilitaires
+   correspondants : après ça, `rounded-lg`, `shadow-md` et `text-red-500`
+   ne compilent plus. La règle n'est plus une consigne, c'est une
+   contrainte de l'outil.
+   ————————————————————————————————————————————————————————————————— */
+
+@theme {
+  --color-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-shadow-*: initial;
+  --blur-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  /* Échelle typographique imposée : 11 / 13 / 15 / 18 / 24 / 40 / 72. */
+  --text-11: 11px;
+  --text-11--line-height: 16px;
+  --text-13: 13px;
+  --text-13--line-height: 20px;
+  --text-15: 15px;
+  --text-15--line-height: 24px;
+  --text-18: 18px;
+  --text-18--line-height: 24px;
+  --text-24: 24px;
+  --text-24--line-height: 32px;
+  --text-24--letter-spacing: -0.02em;
+  --text-40: 40px;
+  --text-40--line-height: 44px;
+  --text-40--letter-spacing: -0.02em;
+  --text-72: 72px;
+  --text-72--line-height: 72px;
+  --text-72--letter-spacing: -0.02em;
+}
+
+@theme inline {
+  /* `inline` fait pointer les utilitaires sur la variable et non sur sa
+     valeur : la bascule clair/sombre tient donc dans la seule media query
+     ci-dessus, sans jamais écrire `dark:`. */
+  --color-fond: var(--fond);
+  --color-texte: var(--texte);
+  --color-secondaire: var(--secondaire);
+  --color-trait: var(--trait);
+
+  --font-sans: var(--police-interface), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--police-chiffres), ui-monospace, monospace;
+}
+
+/* —————————————————————————————————————————————————————————————————
+   Base
+   ————————————————————————————————————————————————————————————————— */
+
+/* Vider les espaces de noms ci-dessus supprime `rounded-lg` et `shadow-md`,
+   mais pas les utilités statiques de Tailwind : `rounded`, `rounded-full`,
+   `shadow` et `ring` ont leurs propres valeurs en dur et survivent.
+   Cette règle est volontairement hors de toute `@layer` — dans la cascade,
+   une déclaration sans couche l'emporte sur n'importe quelle déclaration en
+   couche, quelle que soit sa spécificité.
+   Seule limite connue et acceptée : un utilitaire forcé (`rounded-full!`)
+   passerait quand même, `!important` battant une règle hors couche. */
+*,
+::before,
+::after {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    background-color: var(--fond);
+  }
+
+  body {
+    background-color: var(--fond);
+    color: var(--texte);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 24px;
+    /* Supprime le rebond élastique de la coque en PWA installée. */
+    overscroll-behavior-y: none;
+  }
+
+  /* Tailwind v4 : la couleur de bordure par défaut est passée à
+     `currentColor`. Dans un design entièrement fait de filets, chaque
+     bordure rendrait du noir pur. On rétablit le token Trait. */
+  *,
+  ::before,
+  ::after {
+    border-color: var(--trait);
+  }
+
+  /* Sous 16px, Safari iOS zoome le viewport à la mise au point du champ
+     et n'en revient jamais. Non négociable. */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  /* Supprime le délai de 300 ms hérité du double-tap pour zoomer. */
+  button,
+  a,
+  label,
+  [role='button'] {
+    touch-action: manipulation;
+  }
+
+  button,
+  select {
+    color: inherit;
+  }
+
+  /* Tous les nombres passent en Geist Mono : c'est ce qui donne le côté
+     instrument. Les chiffres tabulaires évitent que les colonnes dansent
+     quand une valeur change. */
+  .chiffres {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+}
+
+@layer components {
+  /* La transition unique de l'application : 120 ms, ease-out, sur les
+     changements d'état. Rien d'autre ne bouge. */
+  .transition-etat {
+    transition-property: transform, opacity, background-color, color, border-color;
+    transition-duration: var(--duree);
+    transition-timing-function: ease-out;
+  }
+
+  /* Libellé de widget : 11px, majuscules, interlettrage +0.08em, Graphite. */
+  .libelle {
+    font-size: 11px;
+    line-height: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--secondaire);
+  }
+
+  /* Cible tactile minimale. 44px est le plancher iOS, pas un objectif. */
+  .cible {
+    min-height: 44px;
+  }
+}
+
+@layer utilities {
+  /* Zone sûre des appareils à encoche / barre d'accueil. */
+  .pb-sure {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .h-ecran {
+    height: 100dvh;
+  }
+  .min-h-ecran {
+    min-height: 100dvh;
+  }
+}
