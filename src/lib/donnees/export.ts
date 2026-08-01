@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { supabase } from '@/lib/supabase/client'
-import { aujourdhui } from '@/lib/date'
+import { aujourdhui, maintenant } from '@/lib/date'
 
 /**
  * L'export JSON complet.
@@ -65,12 +65,10 @@ export async function exporterTout(): Promise<Export> {
     comptes[table] = data?.length ?? 0
   }
 
-  const instant = new Date()
-
   return {
     application: 'Mon 2e Cerveau',
     version: 1,
-    exporteLe: instant.toISOString(),
+    exporteLe: maintenant(),
     jour: aujourdhui(),
     tables,
     comptes,

@@ -2,7 +2,7 @@ import 'server-only'
 
 import { cache } from 'react'
 import { supabase } from '@/lib/supabase/client'
-import { decaler, jourDe, plage, type Jour } from '@/lib/date'
+import { decaler, jourDe, maintenant, plage, type Jour } from '@/lib/date'
 
 /**
  * Lectures de l'agenda.
@@ -108,12 +108,15 @@ export const agendaEntre = cache(
 /** Les prochains événements, pour le widget du tableau de bord. */
 export const prochainsEvenements = cache(
   async (dansNJours = 7): Promise<Evenement[]> => {
-    const maintenant = new Date()
+    const instant = maintenant()
     const { data, error } = await supabase()
       .from('events')
       .select(COLONNES)
-      .gte('ends_at', maintenant.toISOString())
-      .lt('starts_at', `${decaler(jourDe(maintenant), dansNJours)}T00:00:00Z`)
+      // Sur `ends_at` et non `starts_at` : un événement en cours doit rester
+      // affiché jusqu'à sa fin. Voir disparaître du tableau de bord la réunion
+      // à laquelle on assiste est une petite trahison.
+      .gte('ends_at', instant)
+      .lt('starts_at', `${decaler(jourDe(instant), dansNJours)}T00:00:00Z`)
       .order('starts_at')
       .limit(20)
 
