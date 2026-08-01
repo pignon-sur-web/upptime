@@ -33,14 +33,18 @@ export function Champ({
   )
 }
 
-export function Saisie(
-  proprietes: React.InputHTMLAttributes<HTMLInputElement>,
-) {
+/*
+ * `ComponentPropsWithRef` plutôt que `InputHTMLAttributes` : depuis React 19,
+ * `ref` est une propriété ordinaire des composants fonction, mais il faut le
+ * dire au typage pour que la saisie rapide puisse récupérer le focus après
+ * l'envoi.
+ */
+export function Saisie(proprietes: React.ComponentPropsWithRef<'input'>) {
   const { className, ...reste } = proprietes
   return <input {...reste} className={[CLASSE_SAISIE, className ?? ''].join(' ')} />
 }
 
-export function Zone(proprietes: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+export function Zone(proprietes: React.ComponentPropsWithRef<'textarea'>) {
   const { className, ...reste } = proprietes
   return (
     <textarea
@@ -50,7 +54,7 @@ export function Zone(proprietes: React.TextareaHTMLAttributes<HTMLTextAreaElemen
   )
 }
 
-export function Menu(proprietes: React.SelectHTMLAttributes<HTMLSelectElement>) {
+export function Menu(proprietes: React.ComponentPropsWithRef<'select'>) {
   const { className, children, ...reste } = proprietes
   return (
     <select {...reste} className={[CLASSE_SAISIE, className ?? ''].join(' ')}>
@@ -67,7 +71,7 @@ export function Menu(proprietes: React.SelectHTMLAttributes<HTMLSelectElement>) 
 export function BoutonPrincipal({
   children,
   ...reste
-}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+}: React.ComponentPropsWithRef<'button'>) {
   return (
     <button
       {...reste}
@@ -82,7 +86,7 @@ export function BoutonPrincipal({
 export function BoutonDiscret({
   children,
   ...reste
-}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+}: React.ComponentPropsWithRef<'button'>) {
   return (
     <button {...reste} className="cible px-2 text-13 text-secondaire underline">
       {children}

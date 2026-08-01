@@ -8,6 +8,11 @@ import {
   SeptJoursWidget,
   TachesDuJourWidget,
 } from './TachesWidgets'
+import {
+  ComptesWidget,
+  MoisEnArgentWidget,
+  PaiementsAVenirWidget,
+} from './ArgentWidgets'
 
 /**
  * Le registre est le seul endroit où les widgets sont énumérés.
@@ -54,6 +59,9 @@ export const WIDGETS: readonly DefinitionWidget[] = [
   { cle: 'taches_du_jour', libelle: "Tâches d'aujourd'hui", Composant: TachesDuJourWidget },
   { cle: 'retards', libelle: 'En retard', Composant: RetardsWidget },
   { cle: 'sept_jours', libelle: 'Sept prochains jours', Composant: SeptJoursWidget },
+  { cle: 'comptes', libelle: 'Comptes', Composant: ComptesWidget },
+  { cle: 'mois_en_argent', libelle: 'Le mois en argent', Composant: MoisEnArgentWidget },
+  { cle: 'paiements_a_venir', libelle: 'Paiements à venir', Composant: PaiementsAVenirWidget },
   { cle: 'projets_en_cours', libelle: 'Projets en cours', Composant: ProjetsEnCoursWidget },
   { cle: 'mur_du_mois', libelle: 'Le mur du mois', Composant: MurDuMoisWidget },
   { cle: 'courbe_habitudes', libelle: 'Courbe des habitudes', Composant: CourbeHabitudesWidget },
