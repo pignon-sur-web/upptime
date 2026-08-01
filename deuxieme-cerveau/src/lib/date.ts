@@ -44,6 +44,83 @@ export function aujourdhui(): Jour {
   return jourDe(new Date())
 }
 
+// — Instants ——————————————————————————————————————————————————————
+//
+// L'agenda est le seul domaine qui manipule des instants plutôt que des jours,
+// d'où `timestamptz` en base. Les deux conversions qu'il réclame vivent ici,
+// avec le reste du fuseau, et nulle part ailleurs.
+
+// `en-GB` plutôt que `fr-BE` : c'est une locale en h23, donc minuit s'écrit
+// « 00:30 » et non « 24:30 ». Le rendu est identique le reste de la journée.
+const formatteurHeure = new Intl.DateTimeFormat('en-GB', {
+  timeZone: FUSEAU,
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+})
+
+/** « 14:30 », en heure belge. */
+export function heure(instant: string | Date): string {
+  return formatteurHeure.format(
+    typeof instant === 'string' ? new Date(instant) : instant,
+  )
+}
+
+const formatteurComplet = new Intl.DateTimeFormat('en-GB', {
+  timeZone: FUSEAU,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false,
+})
+
+/** Décalage du fuseau, en millisecondes, à un instant donné. */
+function decalageFuseau(instant: Date): number {
+  const parties = Object.fromEntries(
+    formatteurComplet.formatToParts(instant).map((p) => [p.type, p.value]),
+  )
+  const commeUTC = Date.UTC(
+    Number(parties.year),
+    Number(parties.month) - 1,
+    Number(parties.day),
+    Number(parties.hour) % 24,
+    Number(parties.minute),
+    Number(parties.second),
+  )
+  return commeUTC - instant.getTime()
+}
+
+/**
+ * Convertit une heure de pendule belge — ce que rend un `<input
+ * type="datetime-local">`, « 2026-08-01T14:30 » — en instant absolu.
+ *
+ * Sans cette conversion, un rendez-vous saisi à 14h30 serait stocké comme
+ * 14h30 UTC et s'afficherait à 16h30 en été. La double passe traite le cas du
+ * changement d'heure : le décalage dépend de l'instant, et l'instant dépend du
+ * décalage. Une seconde itération suffit pour converger partout sauf dans
+ * l'heure qui n'existe pas au passage à l'heure d'été, où le résultat reste
+ * raisonnable.
+ */
+export function instantDepuisLocal(local: string): string {
+  const naif = Date.parse(`${local.length === 16 ? local : local.slice(0, 16)}:00Z`)
+  if (Number.isNaN(naif)) throw new Error(`Date et heure illisibles : ${local}`)
+
+  let instant = naif - decalageFuseau(new Date(naif))
+  instant = naif - decalageFuseau(new Date(instant))
+
+  const resultat = new Date(instant)
+  return resultat.toISOString()
+}
+
+/** L'inverse : un instant vers la valeur d'un `<input type="datetime-local">`. */
+export function localDepuisInstant(instant: string | Date): string {
+  const d = typeof instant === 'string' ? new Date(instant) : instant
+  return `${jourDe(d)}T${heure(d)}`
+}
+
 /**
  * Ancre un jour à midi UTC. Midi et non minuit : ça laisse douze heures de
  * marge de part et d'autre, donc aucun décalage horaire ni changement d'heure
