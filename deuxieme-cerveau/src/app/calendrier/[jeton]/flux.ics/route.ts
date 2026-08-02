@@ -6,6 +6,20 @@ import { jetonCalendrierValide } from '@/lib/jeton-calendrier'
 export const dynamic = 'force-dynamic'
 
 /**
+ * Même région que le projet Supabase, comme le groupe `(app)`.
+ *
+ * Cette route vit hors de `(app)`, elle n'hérite donc pas du `preferredRegion`
+ * de son layout — et c'est la seule route dans ce cas qui interroge la base.
+ * Sans cette ligne, chaque rafraîchissement de Calendrier Apple traverserait
+ * l'Atlantique pour aller chercher des données hébergées à Francfort.
+ *
+ * C'est déclaré ici plutôt que dans le tableau de bord Vercel parce qu'un
+ * réglage d'interface ne se déplace pas avec le dépôt : personne ne pense à le
+ * reporter le jour où le projet est recréé.
+ */
+export const preferredRegion = 'fra1'
+
+/**
  * Le flux iCalendar, à abonner depuis Calendrier Apple.
  *
  * C'est le seul chemin de l'application qui échappe au cookie de session, et
