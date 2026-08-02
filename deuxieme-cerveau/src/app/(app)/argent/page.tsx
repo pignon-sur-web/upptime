@@ -18,7 +18,7 @@ import {
   moisEnArgent,
   transactions,
 } from '@/lib/donnees/finances'
-import { euros } from '@/lib/argent'
+import { euros, teinteMontant, teinteSolde } from '@/lib/argent'
 import { aujourdhui, moisLong } from '@/lib/date'
 
 export const metadata = { title: 'Argent' }
@@ -131,7 +131,12 @@ async function Comptes() {
                   </span>
                 ) : null}
               </span>
-              <span className="chiffres shrink-0 text-18">
+              <span
+                className={[
+                  'chiffres shrink-0 text-18',
+                  teinteSolde(compte.soldePointeCents),
+                ].join(' ')}
+              >
                 {euros(compte.soldePointeCents)}
               </span>
             </Link>
@@ -177,16 +182,18 @@ async function VueMois() {
         }
       >
         <div className="flex items-end justify-between gap-4">
-          <p className="chiffres text-40 leading-none">
+          <p
+            className={['chiffres text-40 leading-none', teinteMontant(mois.netCents)].join(
+              ' ',
+            )}
+          >
             {mois.netCents >= 0 ? '+' : ''}
             {euros(mois.netCents)}
           </p>
           <div className="text-right text-11 text-secondaire">
-            <p className="chiffres text-13 text-texte">{euros(mois.entreesCents)}</p>
+            <p className="chiffres text-13 text-reussite">{euros(mois.entreesCents)}</p>
             <p>entrées</p>
-            <p className="chiffres mt-1 text-13 text-texte">
-              {euros(-mois.sortiesCents)}
-            </p>
+            <p className="chiffres mt-1 text-13 text-echec">{euros(-mois.sortiesCents)}</p>
             <p>sorties</p>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Widget } from '@/components/ui/Widget'
 import { comptes, echeancesAVenir, moisEnArgent } from '@/lib/donnees/finances'
-import { euros } from '@/lib/argent'
+import { euros, teinteMontant, teinteSolde } from '@/lib/argent'
 import { aujourdhui, jourRelatif, moisLong } from '@/lib/date'
 
 /**
@@ -34,7 +34,9 @@ export async function ComptesWidget() {
       }
     >
       <div className="flex items-end justify-between gap-4">
-        <p className="chiffres text-40 leading-none">{euros(total)}</p>
+        <p className={['chiffres text-40 leading-none', teinteSolde(total)].join(' ')}>
+          {euros(total)}
+        </p>
       </div>
 
       <ul className="mt-3">
@@ -68,14 +70,18 @@ export async function MoisEnArgentWidget() {
       }
     >
       <div className="flex items-end justify-between gap-4">
-        <p className="chiffres text-40 leading-none">
+        <p
+          className={['chiffres text-40 leading-none', teinteMontant(mois.netCents)].join(
+            ' ',
+          )}
+        >
           {mois.netCents >= 0 ? '+' : ''}
           {euros(mois.netCents)}
         </p>
         <div className="pb-1 text-right text-11 text-secondaire">
-          <p className="chiffres text-13 text-texte">{euros(mois.entreesCents)}</p>
+          <p className="chiffres text-13 text-reussite">{euros(mois.entreesCents)}</p>
           <p>entrées</p>
-          <p className="chiffres mt-1 text-13 text-texte">{euros(-mois.sortiesCents)}</p>
+          <p className="chiffres mt-1 text-13 text-echec">{euros(-mois.sortiesCents)}</p>
           <p>sorties</p>
         </div>
       </div>

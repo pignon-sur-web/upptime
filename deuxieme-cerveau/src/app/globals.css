@@ -15,6 +15,16 @@
   --secondaire: #75757c; /* Graphite */
   --trait: #e6e6e2; /* Trait */
 
+  /* Deux couleurs, et deux seulement : ce qui a réussi, ce qui a raté.
+     Elles ne décorent rien — partout où elles apparaissent, elles portent
+     un jugement que le noir et blanc ne pouvait pas porter seul. Tout le
+     reste de l'interface reste en Encre sur Papier. */
+  --reussite: #14794a;
+  --echec: #b3261e;
+  /* Fonds très pâles, pour teinter une ligne sans écraser son texte. */
+  --reussite-fond: #e6f4ec;
+  --echec-fond: #fbeae9;
+
   --duree: 120ms;
 }
 
@@ -24,6 +34,14 @@
     --texte: #fbfbf9;
     --secondaire: #75757c;
     --trait: #232327; /* Trait nuit */
+
+    /* Sur fond noir, les mêmes teintes seraient illisibles : on remonte la
+       luminosité et on baisse la saturation. Le contraste reste au-dessus de
+       4,5:1 dans les deux thèmes. */
+    --reussite: #4cc38a;
+    --echec: #f2726a;
+    --reussite-fond: #14291f;
+    --echec-fond: #2b1614;
   }
 }
 
@@ -84,6 +102,10 @@
   --color-texte: var(--texte);
   --color-secondaire: var(--secondaire);
   --color-trait: var(--trait);
+  --color-reussite: var(--reussite);
+  --color-echec: var(--echec);
+  --color-reussite-fond: var(--reussite-fond);
+  --color-echec-fond: var(--echec-fond);
 
   --font-sans: var(--police-interface), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--police-chiffres), ui-monospace, monospace;

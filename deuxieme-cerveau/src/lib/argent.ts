@@ -85,3 +85,21 @@ export function signerMontant(kind: string, centsAbsolus: number): number {
   const magnitude = Math.abs(centsAbsolus)
   return kind === 'depense' ? -magnitude : magnitude
 }
+
+/**
+ * La classe de couleur d'un montant : vert s'il entre, rouge s'il sort.
+ *
+ * Rendue ici et non dans chaque composant, pour que la règle soit la même
+ * partout — y compris le jour où l'on décidera qu'un solde négatif mérite le
+ * rouge et qu'un solde positif ne mérite rien.
+ */
+export function teinteMontant(cents: number): string {
+  if (cents > 0) return 'text-reussite'
+  if (cents < 0) return 'text-echec'
+  return ''
+}
+
+/** Un solde : rouge seulement s'il est négatif. Un solde positif est normal. */
+export function teinteSolde(cents: number): string {
+  return cents < 0 ? 'text-echec' : ''
+}
