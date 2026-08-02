@@ -13,6 +13,7 @@ import {
   listerTaches,
   tachesDuJour,
   tachesEnRetard,
+  tachesSansEcheance,
   tachesSeptJours,
   type Tache,
 } from '@/lib/donnees/taches'
@@ -85,33 +86,52 @@ export default async function PageTaches({
  * transformer en reproche.
  */
 async function VueJour() {
-  const [taches, retards] = await Promise.all([tachesDuJour(), tachesEnRetard()])
+  const [taches, retards, sansDate] = await Promise.all([
+    tachesDuJour(),
+    tachesEnRetard(),
+    tachesSansEcheance(),
+  ])
 
   return (
-    <Widget
-      libelle={jourLong(aujourdhui())}
-      action={
-        taches.length > 0 ? (
-          <span className="chiffres text-13">
-            {taches.length}
-            {retards.length > 0 ? ` · ${retards.length} en retard` : ''}
-          </span>
-        ) : null
-      }
-    >
-      <ListeTaches
-        taches={taches}
-        vide={
-          <Invitation>
-            Rien pour aujourd&apos;hui.{' '}
-            <Link href="/taches/nouvelle" className="underline">
-              Ajouter une tâche
-            </Link>
-            .
-          </Invitation>
+    <>
+      <Widget
+        libelle={jourLong(aujourdhui())}
+        action={
+          taches.length > 0 ? (
+            <span className="chiffres text-13">
+              {taches.length}
+              {retards.length > 0 ? ` · ${retards.length} en retard` : ''}
+            </span>
+          ) : null
         }
-      />
-    </Widget>
+      >
+        <ListeTaches
+          taches={taches}
+          vide={
+            <Invitation>
+              Rien pour aujourd&apos;hui.{' '}
+              <Link href="/taches/nouvelle" className="underline">
+                Ajouter une tâche
+              </Link>
+              .
+            </Invitation>
+          }
+        />
+      </Widget>
+
+      {/* Une carte à part, et seulement s'il y en a. Ces tâches ne sont pas
+          dues aujourd'hui : les fondre dans la liste du jour les rendrait
+          « en retard » demain matin, ce qu'elles ne sont pas. */}
+      {sansDate.length > 0 ? (
+        <Widget
+          libelle="Sans date"
+          emoji="🗒️"
+          action={<span className="chiffres text-13">{sansDate.length}</span>}
+        >
+          <ListeTaches taches={sansDate} reportable={false} />
+        </Widget>
+      ) : null}
+    </>
   )
 }
 

@@ -163,6 +163,47 @@ verifier('connexion réussie', new URL(page.url()).pathname === '/')
   )
 }
 
+// — Tâches : une tâche sans échéance doit se voir quelque part ——————
+//
+// Le cas manquait, et c'est exactement celui qui a cassé : le parcours
+// ci-dessus remplissait toujours la date. Or `due_date <= aujourd'hui` ne
+// ramène pas les lignes à `null` — en SQL, comparer à `null` donne inconnu,
+// pas faux. Une tâche notée sans date était donc bien enregistrée et
+// invisible partout, ce qui se lit comme « la création ne marche pas ».
+
+{
+  await aller('/taches/nouvelle')
+  await page.fill('input[name=titre]', `${MARQUE} sans date`)
+  // Pas de `echeance` : c'est tout l'objet du contrôle.
+  await page.click('button[type=submit]')
+  await page.waitForURL(`${BASE}/taches`, { timeout: 15000 })
+
+  const surTaches = (await page.textContent('body')) ?? ''
+  verifier(
+    'une tâche sans échéance apparaît sur l’écran Tâches',
+    surTaches.includes(`${MARQUE} sans date`),
+  )
+
+  // Sur le tableau de bord on vérifie la SECTION, pas cette tâche-ci : le
+  // widget n'en montre que cinq et renvoie le reste sur l'écran Tâches.
+  // Assurer la présence du titre exact rendrait le contrôle dépendant du
+  // nombre de tâches sans date déjà en base, donc vert ou rouge selon
+  // l'humeur du moment.
+  await aller('/')
+  const surAccueil = (await page.textContent('body')) ?? ''
+  verifier(
+    'le tableau de bord montre les tâches sans date',
+    surAccueil.includes('Sans date'),
+  )
+
+  // Et elle ne doit pas être comptée comme un retard : elle n'a pas de date
+  // à dépasser.
+  verifier(
+    'une tâche sans échéance n’est pas comptée en retard',
+    !/sans date[\s\S]{0,80}en retard/.test(surTaches),
+  )
+}
+
 // — Tâches : récurrence mensuelle née le 31 ——————————————————————
 
 {

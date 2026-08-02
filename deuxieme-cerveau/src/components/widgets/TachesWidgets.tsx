@@ -5,6 +5,7 @@ import { ListeTaches } from '@/components/taches/ListeTaches'
 import {
   tachesDuJour,
   tachesEnRetard,
+  tachesSansEcheance,
   tachesSeptJours,
 } from '@/lib/donnees/taches'
 import { listerProjets } from '@/lib/donnees/projets'
@@ -24,7 +25,10 @@ import { jourRelatif, jourSemaineCourt } from '@/lib/date'
  * jour : il affiche alors une invitation, jamais un « aucune donnée ».
  */
 export async function TachesDuJourWidget() {
-  const taches = await tachesDuJour()
+  const [taches, sansDate] = await Promise.all([
+    tachesDuJour(),
+    tachesSansEcheance(),
+  ])
 
   return (
     <Widget
@@ -56,6 +60,24 @@ export async function TachesDuJourWidget() {
         <Link href="/taches" className="mt-3 block text-13 text-secondaire underline">
           {taches.length - 7} de plus
         </Link>
+      ) : null}
+
+      {/* Les tâches sans date, en dessous et annoncées comme telles. Elles ne
+          sont pas dues aujourd'hui — les mêler à la liste du jour les ferait
+          passer pour un retard dès demain. */}
+      {sansDate.length > 0 ? (
+        <div className="mt-4 border-t border-trait pt-3">
+          <p className="libelle mb-1">Sans date</p>
+          <ListeTaches taches={sansDate.slice(0, 5)} reportable={false} />
+          {sansDate.length > 5 ? (
+            <Link
+              href="/taches"
+              className="mt-2 block text-13 text-secondaire underline"
+            >
+              {sansDate.length - 5} de plus
+            </Link>
+          ) : null}
+        </div>
       ) : null}
     </Widget>
   )

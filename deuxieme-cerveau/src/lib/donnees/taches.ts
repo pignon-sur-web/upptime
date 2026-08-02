@@ -118,6 +118,32 @@ export const tachesDuJour = cache(async (): Promise<Tache[]> => {
   return ordonner(await convertir(data ?? []))
 })
 
+/**
+ * Les tâches ouvertes sans échéance.
+ *
+ * Elles ont failli ne jamais être affichées nulle part. `tachesDuJour` filtre
+ * sur `due_date <= aujourd'hui`, et en SQL une comparaison avec `null` n'est
+ * pas fausse : elle est inconnue, donc la ligne ne sort pas. Une tâche notée
+ * sans date disparaissait sans le moindre message — elle était bien en base,
+ * simplement invisible.
+ *
+ * Elles forment leur propre liste plutôt que de rejoindre celle du jour, et
+ * c'est délibéré : elles ne sont dues aujourd'hui ni ne sont en retard. Les
+ * verser dans « aujourd'hui » gonflerait le dénominateur de l'anneau, qui ne
+ * se refermerait plus jamais, et transformerait une réserve en dette.
+ */
+export const tachesSansEcheance = cache(async (): Promise<Tache[]> => {
+  const { data, error } = await supabase()
+    .from('tasks')
+    .select(COLONNES)
+    .in('status', STATUTS_OUVERTS)
+    .is('due_date', null)
+    .is('parent_task_id', null)
+
+  if (error) throw error
+  return ordonner(await convertir(data ?? []))
+})
+
 /** Les tâches dont l'échéance est passée. Sous-ensemble strict du jour. */
 export const tachesEnRetard = cache(async (): Promise<Tache[]> => {
   const { data, error } = await supabase()
