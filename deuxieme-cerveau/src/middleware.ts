@@ -7,10 +7,16 @@ import { secretAuth } from '@/lib/env'
  * ou le manifeste reçoivent une redirection vers la page de connexion,
  * l'enregistrement du service worker échoue et la PWA ne s'installe jamais,
  * avec un message d'erreur qui ne dit pas pourquoi.
+ *
+ * `calendrier/` est la seule exception qui expose des données. Elle est
+ * délibérée : Calendrier Apple interroge le flux sans navigateur et donc sans
+ * cookie, le secret doit être dans l'URL. La route ne s'ouvre pas pour autant
+ * — elle vérifie elle-même un jeton dérivé d'`AUTH_SECRET`, en temps constant,
+ * et ne rend que des titres et des dates. Voir `lib/jeton-calendrier.ts`.
  */
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|icones/|manifest.webmanifest|sw.js|favicon.ico|apple-touch-icon.png).*)',
+    '/((?!_next/static|_next/image|icones/|calendrier/|manifest.webmanifest|sw.js|favicon.ico|apple-touch-icon.png).*)',
   ],
 }
 

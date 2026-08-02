@@ -102,6 +102,16 @@ ce qu'on fait aujourd'hui ne change le score d'hier.
 Chaque échéance se calcule depuis l'origine de la série et non par additions
 successives, faute de quoi un loyer au 31 janvier finirait par déménager au 28.
 
+**Le calendrier sort en lecture seule, jamais en synchronisation.** Une PWA
+iOS n'a pas de notifications fiables ; un calendrier abonné en a. L'application
+publie donc un flux iCalendar — rendez-vous, tâches datées, échéances — que
+Calendrier Apple relit chaque heure et dont il fait sonner les alertes. C'est
+le seul chemin qui échappe au cookie de session, parce que Calendrier
+interroge l'URL sans navigateur : le secret est dans l'URL, dérivé
+d'`AUTH_SECRET`, comparé en temps constant, et le flux ne porte que des titres
+et des dates — jamais un montant, une note ou un solde. Régénérer
+`AUTH_SECRET` coupe l'abonnement en même temps que les sessions.
+
 **La direction artistique est imposée par l'outillage.** Les espaces de noms
 Tailwind `--color-*`, `--radius-* `et `--shadow-*` sont vidés : `rounded-lg`,
 `shadow-md` et `text-red-500` ne compilent plus. Les utilitaires statiques que
@@ -118,6 +128,7 @@ npm run verifier              # types, lint, build
 npm run verifier:sql          # migrations + logique calculée sur un Postgres jetable
 npm run verifier:csv          # analyseur CSV sur ses cas limites
 npm run verifier:fuseau       # le fuseau, aux heures où il casse
+npm run verifier:ics          # le flux iCalendar, sur ce qui casse un abonnement
 npm run verifier:parcours     # la porte d'entrée, au navigateur (serveur lancé)
 npm run verifier:da           # rayon et ombre réellement neutralisés
 npm run verifier:application  # les six gestes qui comptent, contre une vraie base
@@ -171,6 +182,7 @@ src/lib/donnees/       lectures, enveloppées dans cache()
 src/lib/actions/       écritures, 'use server'
 src/components/ui/     primitives : Widget, Case, Jauge, Ligne
 src/lib/csv.ts         analyseur RFC 4180, sans dépendance
+src/lib/ics.ts         générateur iCalendar RFC 5545, sans dépendance
 src/components/graphiques/  SVG écrits à la main, aucune librairie
 src/components/widgets/     les widgets du tableau de bord + leur registre
 src/lib/argent.ts      centimes entiers, conversion aux deux bords seulement

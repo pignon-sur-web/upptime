@@ -1,10 +1,12 @@
 import Link from 'next/link'
+import { headers } from 'next/headers'
 import { EnTeteSection } from '@/components/nav/EnTete'
 import { Widget } from '@/components/ui/Widget'
 import { WIDGETS, widgetsAffiches } from '@/components/widgets/registre'
 import { reglagesWidgets } from '@/lib/donnees/widgets'
 import { basculerWidget, deplacerWidget } from '@/lib/actions/reglages'
 import { deconnecter } from '@/lib/actions/auth'
+import { jetonCalendrier } from '@/lib/jeton-calendrier'
 
 export const metadata = { title: 'Réglages' }
 
@@ -99,6 +101,8 @@ export default async function PageReglages() {
         </ul>
       </Widget>
 
+      <AbonnementCalendrier />
+
       <Widget libelle="Données">
         <Link href="/reglages/export" className="cible flex items-center text-15 underline">
           Exporter toutes les données
@@ -120,5 +124,52 @@ export default async function PageReglages() {
         </form>
       </Widget>
     </>
+  )
+}
+
+/**
+ * L'abonnement Calendrier Apple.
+ *
+ * Le vrai manque d'une PWA sur iOS, ce ne sont pas les données : ce sont les
+ * notifications. Un calendrier abonné en a, lui. Les cours et les échéances
+ * sonnent parce qu'ils vivent dans Calendrier, pas parce que l'application a
+ * réussi à réveiller le téléphone.
+ *
+ * Le lien est en `webcal://` : sur iPhone, il ouvre directement la fenêtre
+ * d'abonnement au lieu de télécharger un fichier qu'il faudrait ensuite
+ * retrouver.
+ */
+async function AbonnementCalendrier() {
+  const enTetes = await headers()
+  const hote = enTetes.get('x-forwarded-host') ?? enTetes.get('host') ?? 'localhost:3000'
+  const jeton = await jetonCalendrier()
+
+  const chemin = `${hote}/calendrier/${jeton}/flux.ics`
+
+  return (
+    <Widget libelle="Calendrier Apple">
+      <p className="text-13 text-secondaire">
+        Vos rendez-vous, vos tâches datées et vos échéances, dans Calendrier —
+        avec ses alertes. En lecture seule : cocher et modifier se font ici.
+      </p>
+
+      <a
+        href={`webcal://${chemin}`}
+        className="cible mt-4 flex w-full items-center justify-center bg-texte px-4 text-15 font-medium text-fond"
+      >
+        S&apos;abonner sur cet appareil
+      </a>
+
+      <p className="mt-3 libelle">Ou copier l&apos;adresse</p>
+      <p className="chiffres mt-1 break-all text-11 text-secondaire">https://{chemin}</p>
+
+      <p className="mt-3 text-11 text-secondaire">
+        Le lien contient un secret dérivé d&apos;<span className="chiffres">AUTH_SECRET</span> :
+        qui l&apos;a peut lire votre agenda. C&apos;est pourquoi le flux ne porte que des
+        titres et des dates, jamais un montant ni une note. Régénérer{' '}
+        <span className="chiffres">AUTH_SECRET</span> coupe l&apos;abonnement en même
+        temps que toutes les sessions.
+      </p>
+    </Widget>
   )
 }
