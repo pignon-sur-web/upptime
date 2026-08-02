@@ -15,6 +15,23 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   typedRoutes: true,
 
+  experimental: {
+    /*
+     * Ne jamais resservir une page depuis le cache de navigation du client.
+     *
+     * Par défaut, Next garde en mémoire les pages déjà visitées pendant trente
+     * secondes. Conséquence observée : on coche une habitude sur /habitudes,
+     * on revient sur l'accueil par la barre d'onglets, et le score affiche
+     * encore l'ancienne valeur — la page vient du cache, pas du serveur. Le
+     * geste central de l'application semblait alors sans effet, ce qui est la
+     * pire chose qu'un tableau de bord puisse faire.
+     *
+     * Toutes les pages ici sont `force-dynamic` et personnelles : il n'y a
+     * rien à gagner à les garder, et tout à perdre.
+     */
+    staleTimes: { dynamic: 0, static: 0 },
+  },
+
   images: {
     remotePatterns: hoteSupabase
       ? [

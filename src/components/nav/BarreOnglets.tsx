@@ -21,6 +21,7 @@ export function BarreOnglets() {
   const chemin = usePathname()
   const [panneauOuvert, setPanneauOuvert] = useState(false)
 
+
   // La navigation ferme le panneau : sans ça, il resterait ouvert par-dessus
   // l'écran qu'on vient de demander.
   useEffect(() => {
@@ -44,6 +45,10 @@ export function BarreOnglets() {
               <Link
                 key={onglet.href}
                 href={onglet.href}
+                // Pas de préchargement : ces pages sont dynamiques et
+                // personnelles. Une page préchargée il y a trente secondes est
+                // une page fausse, et c'est ce qui figeait le score du jour.
+                prefetch={false}
                 aria-current={actif ? 'page' : undefined}
                 className={[
                   'flex h-13 flex-1 items-center justify-center border-t-2 text-13',
@@ -97,6 +102,7 @@ function PanneauTout({
               <li key={section.href}>
                 <Link
                   href={section.href}
+                  prefetch={false}
                   aria-current={actif ? 'page' : undefined}
                   className={[
                     'flex min-h-14 items-center justify-between gap-4 border-b border-trait px-5 py-2',

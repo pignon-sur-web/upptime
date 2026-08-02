@@ -35,7 +35,7 @@ export async function basculerWidget(cle: string, actif: boolean): Promise<void>
 
   if (error) throw error
 
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/reglages')
 }
 
@@ -99,6 +99,6 @@ export async function deplacerWidget(
 
   if (error) throw error
 
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/reglages')
 }

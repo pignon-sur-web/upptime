@@ -1,6 +1,7 @@
 'use client'
 
 import { useOptimistic, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Case } from '@/components/ui/Case'
 import { basculerHabitude } from '@/lib/actions/habitudes'
 import type { HabitudeDuJour } from '@/lib/donnees/habitudes'
@@ -26,6 +27,7 @@ export function ListeHabitudes({
   jour: Jour
   modifiable?: boolean
 }) {
+  const routeur = useRouter()
   const [enCours, demarrer] = useTransition()
   const [affichees, basculerLocalement] = useOptimistic(
     habitudes,
@@ -37,6 +39,11 @@ export function ListeHabitudes({
     demarrer(async () => {
       basculerLocalement(habitude.id)
       await basculerHabitude(habitude.id, jour, !habitude.cochee)
+      // `revalidatePath` côté serveur ne suffit pas : le navigateur garde en
+      // mémoire les pages déjà visitées, et l'accueil affichait encore
+      // l'ancien score quand on y revenait par la barre d'onglets. Le geste
+      // central de l'application semblait alors sans effet.
+      routeur.refresh()
     })
   }
 

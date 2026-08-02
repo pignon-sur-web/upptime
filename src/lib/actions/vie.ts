@@ -51,7 +51,7 @@ export async function capturer(donnees: FormData): Promise<void> {
 
   if (error) throw error
 
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/inbox')
 }
 
@@ -97,7 +97,7 @@ export async function convertirInbox(
 
   if (erreurMarquage) throw erreurMarquage
 
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/inbox')
   revalidatePath(vers === 'tache' ? '/taches' : '/notes')
 }
@@ -108,7 +108,7 @@ export async function supprimerInbox(id: string): Promise<void> {
   const { error } = await supabase().from('inbox_items').delete().eq('id', id)
   if (error) throw error
 
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/inbox')
 }
 
@@ -211,7 +211,7 @@ export async function enregistrerLivre(donnees: FormData): Promise<void> {
 
   if (error) throw error
 
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/lectures')
 }
 
@@ -224,7 +224,7 @@ export async function supprimerLivre(id: string): Promise<void> {
   const { error } = await supabase().from('books').delete().eq('id', id)
   if (error) throw error
 
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/lectures')
 }
 

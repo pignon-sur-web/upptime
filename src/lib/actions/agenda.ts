@@ -16,7 +16,7 @@ import { instantDepuisLocal } from '@/lib/date'
  */
 
 function rafraichir() {
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/agenda')
 }
 

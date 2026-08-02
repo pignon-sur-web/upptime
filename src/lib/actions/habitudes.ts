@@ -39,7 +39,7 @@ export async function basculerHabitude(
 
   if (error) throw error
 
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/habitudes')
 }
 
@@ -72,7 +72,7 @@ export async function creerHabitude(donnees: FormData): Promise<void> {
 
   if (error) throw error
 
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/habitudes')
 }
 
@@ -102,7 +102,7 @@ export async function renommerHabitude(
 
   if (error) throw error
 
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/habitudes')
 }
 
@@ -125,7 +125,7 @@ export async function archiverHabitude(habitudeId: string): Promise<void> {
 
   if (error) throw error
 
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/habitudes')
 }
 
@@ -139,7 +139,7 @@ export async function reactiverHabitude(habitudeId: string): Promise<void> {
 
   if (error) throw error
 
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/habitudes')
 }
 
@@ -175,6 +175,6 @@ export async function deplacerHabitude(
     supabase().from('habits').update({ position: index }).eq('id', voisine.id),
   ])
 
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/habitudes')
 }
