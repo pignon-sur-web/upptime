@@ -2,7 +2,7 @@ import 'server-only'
 
 import { cache } from 'react'
 import { supabase } from '@/lib/supabase/client'
-import { aujourdhui, decaler, jourSemaineISO, type Jour } from '@/lib/date'
+import { aujourdhui, decaler, jourSemaineISO, plage, type Jour } from '@/lib/date'
 
 /**
  * Lectures du domaine « habitudes ».
@@ -182,3 +182,71 @@ export const seriesParHabitude = cache(async (): Promise<Map<string, number>> =>
 
   return new Map(series)
 })
+
+export type SuiviHabitude = {
+  habitude: Habitude
+  /** Un point par jour, du plus ancien au plus récent. */
+  jours: { jour: Jour; programme: boolean; fait: boolean }[]
+  /** Taux de réussite sur les jours programmés de la fenêtre. */
+  taux: number | null
+  serie: number
+  faits: number
+  programmes: number
+}
+
+/**
+ * Le suivi jour par jour de chaque habitude, sur une fenêtre.
+ *
+ * Le score global dit si la journée a été bonne ; il ne dit pas laquelle des
+ * trois habitudes décroche. C'est pourtant la seule information qui permette
+ * d'agir : on ne redresse pas « 62 % », on redresse « Écrire ».
+ *
+ * Les jours non programmés sont marqués comme tels plutôt qu'omis : une courbe
+ * qui saute les samedis d'une habitude en semaine se lirait comme une chute.
+ */
+export const suiviParHabitude = cache(
+  async (nbJours = 30): Promise<SuiviHabitude[]> => {
+    const debut = decaler(aujourdhui(), -(nbJours - 1))
+    const habitudes = await habitudesActives()
+    if (habitudes.length === 0) return []
+
+    const [journal, series] = await Promise.all([
+      supabase()
+        .from('habit_logs')
+        .select('habit_id, date, done')
+        .gte('date', debut),
+      seriesParHabitude(),
+    ])
+
+    if (journal.error) throw journal.error
+
+    const coches = new Set(
+      (journal.data ?? [])
+        .filter((l) => l.done)
+        .map((l) => `${l.habit_id}|${l.date}`),
+    )
+
+    return habitudes.map((habitude) => {
+      const jours = plage(debut, aujourdhui()).map((jour) => {
+        const programme =
+          habitude.demarreeLe <= jour &&
+          (habitude.archiveeLe === null || jour < habitude.archiveeLe) &&
+          habitude.joursSemaine.includes(jourSemaineISO(jour))
+        return { jour, programme, fait: coches.has(`${habitude.id}|${jour}`) }
+      })
+
+      // Le jour courant sort du dénominateur : il n'est pas encore raté.
+      const evalues = jours.filter((j) => j.programme && j.jour !== aujourdhui())
+      const faits = evalues.filter((j) => j.fait).length
+
+      return {
+        habitude,
+        jours,
+        taux: evalues.length === 0 ? null : faits / evalues.length,
+        serie: series.get(habitude.id) ?? 0,
+        faits,
+        programmes: evalues.length,
+      }
+    })
+  },
+)

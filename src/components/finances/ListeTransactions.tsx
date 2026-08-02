@@ -1,4 +1,4 @@
-import { euros } from '@/lib/argent'
+import { euros, teinteMontant } from '@/lib/argent'
 import { jourCourt } from '@/lib/date'
 import { supprimerEcriture, supprimerVirement } from '@/lib/actions/finances'
 import type { Transaction } from '@/lib/donnees/finances'
@@ -67,7 +67,18 @@ export function ListeTransactions({
               </span>
             </span>
 
-            <span className="chiffres shrink-0 text-13">{euros(tx.montantCents)}</span>
+            <span
+              className={[
+                'chiffres shrink-0 text-13',
+                // Un virement ne gagne ni ne perd rien : il déplace. Le
+                // teinter en vert d'un côté et en rouge de l'autre ferait
+                // croire à un gain et à une perte là où il n'y a qu'un
+                // déplacement.
+                virement ? '' : teinteMontant(tx.montantCents),
+              ].join(' ')}
+            >
+              {euros(tx.montantCents)}
+            </span>
 
             {virement ? (
               <form action={supprimerVirement.bind(null, tx.groupeVirement ?? '')}>

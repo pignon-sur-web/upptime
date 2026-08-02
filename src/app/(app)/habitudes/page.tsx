@@ -4,7 +4,12 @@ import { Widget, Invitation } from '@/components/ui/Widget'
 import { ListeHabitudes } from '@/components/habitudes/ListeHabitudes'
 import { MurDuMois } from '@/components/graphiques/MurDuMois'
 import { Courbe } from '@/components/graphiques/Courbe'
-import { habitudesDuJour, scoresDepuis, seriesParHabitude } from '@/lib/donnees/habitudes'
+import {
+  habitudesDuJour,
+  scoresDepuis,
+  suiviParHabitude,
+} from '@/lib/donnees/habitudes'
+import { BlocHabitude } from '@/components/graphiques/CourbeHabitude'
 import { JOURS_RATTRAPAGE } from '@/lib/regles'
 import {
   aujourdhui,
@@ -35,12 +40,14 @@ export default async function PageHabitudes({
 
   const fenetre = FENETRES.find((f) => String(f) === fenetreDemandee) ?? FENETRES[0]
 
-  const [habitudes, series, scoresFenetre, scoresMois] = await Promise.all([
+  // `suiviParHabitude` porte déjà les séries : les redemander ici ferait une
+  // requête pour rien.
+  const [habitudes, scoresFenetre, scoresMois, suivis] = await Promise.all([
     habitudesDuJour(jour),
-    seriesParHabitude(),
     scoresDepuis(fenetre),
     // Assez de jours pour couvrir le mois courant depuis le 1er.
     scoresDepuis(Number(aujourdhui().slice(8, 10))),
+    suiviParHabitude(fenetre),
   ])
 
   const cochees = habitudes.filter((h) => h.cochee).length
@@ -111,23 +118,24 @@ export default async function PageHabitudes({
         )}
       </Widget>
 
-      {[...series.values()].some((s) => s > 0) ? (
-        <Widget libelle="Séries en cours">
+      {/* Une courbe par habitude : le score global dit si la journée a été
+          bonne, il ne dit pas laquelle décroche. C'est pourtant la seule
+          information sur laquelle on peut agir. */}
+      {suivis.length > 0 ? (
+        <Widget
+          libelle={`Chaque habitude — ${fenetre} jours`}
+          action={
+            suivis.some((s) => s.programmes > 0) ? (
+              <span className="chiffres text-11 text-secondaire">
+                {suivis.filter((s) => s.serie > 0).length}/{suivis.length} en série
+              </span>
+            ) : null
+          }
+        >
           <ul>
-            {[...series.entries()]
-              .filter(([, serie]) => serie > 0)
-              .sort(([, a], [, b]) => b - a)
-              .map(([id, serie]) => (
-                <li
-                  key={id}
-                  className="flex items-baseline justify-between gap-4 border-b border-trait py-2 last:border-b-0"
-                >
-                  <span className="truncate text-13">
-                    {habitudes.find((h) => h.id === id)?.nom ?? '—'}
-                  </span>
-                  <span className="chiffres shrink-0 text-13">{serie} j</span>
-                </li>
-              ))}
+            {suivis.map((suivi) => (
+              <BlocHabitude key={suivi.habitude.id} suivi={suivi} />
+            ))}
           </ul>
         </Widget>
       ) : null}

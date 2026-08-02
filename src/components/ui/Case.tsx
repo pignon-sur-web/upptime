@@ -8,6 +8,10 @@
  * animation de l'interface, et elle est neutralisée par `prefers-reduced-motion`
  * via la variable `--duree`.
  *
+ * Le remplissage est vert et non noir : c'est le geste de réussite le plus
+ * répété de l'application, celui qu'on fait chaque soir. Il mérite la seule
+ * récompense visuelle dont dispose la palette.
+ *
  * La zone tactile fait 44px alors que le carré n'en fait que 24 : la cible
  * déborde volontairement du dessin.
  */
@@ -33,10 +37,17 @@ export function Case({
       onClick={onToggle}
       className="flex size-11 shrink-0 items-center justify-center disabled:opacity-40"
     >
-      <span className="flex size-6 items-center justify-center border border-texte">
+      {/* Le contour passe au vert avec le remplissage : une case verte sur un
+          contour noir se lirait comme une erreur de rendu. */}
+      <span
+        className={[
+          'transition-etat flex size-6 items-center justify-center border',
+          cochee ? 'border-reussite' : 'border-texte',
+        ].join(' ')}
+      >
         <span
           aria-hidden
-          className="transition-etat size-4 origin-center bg-texte"
+          className="transition-etat size-4 origin-center bg-reussite"
           style={{ transform: cochee ? 'scale(1)' : 'scale(0)' }}
         />
       </span>
