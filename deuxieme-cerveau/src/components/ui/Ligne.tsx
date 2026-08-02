@@ -25,7 +25,7 @@ export function Ligne({
     <div
       className={[
         'cible flex w-full items-center justify-between gap-4 border-b border-trait py-2',
-        enRetard ? 'border-l-2 border-l-texte pl-3' : '',
+        enRetard ? 'border-l-2 border-l-echec pl-3' : '',
       ].join(' ')}
     >
       <div className="min-w-0 flex-1">{children}</div>

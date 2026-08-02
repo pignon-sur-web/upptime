@@ -23,9 +23,14 @@ import type { ScoreJour } from '@/lib/donnees/habitudes'
  *
  * La couleur ajoute le jugement que la hauteur seule ne portait pas : vert
  * quand la journée est pleine, rouge quand elle est restée vide alors que
- * quelque chose était demandé. Entre les deux, l'Encre — la plupart des jours
- * sont des jours moyens, et un mois entier de rouge ferait fermer
- * l'application au lieu de la faire ouvrir.
+ * quelque chose était demandé. Entre les deux, le bleu des gestes faits — la
+ * plupart des jours sont des jours moyens, et un mois entier de rouge ferait
+ * fermer l'application au lieu de la faire ouvrir.
+ *
+ * Chaque case est posée sur une rainure grise pleine plutôt que sur un
+ * contour : à cette taille, un carré vidé par un filet de 0,6px se lit comme
+ * une absence de donnée, alors qu'une rainure remplie se lit comme un jour à
+ * zéro. Ce n'est pas la même information.
  *
  * Deux jours n'ont droit à aucune couleur, et c'est la même raison dans les
  * deux cas : AUJOURD'HUI, parce que la journée n'est pas finie et qu'un rouge
@@ -52,7 +57,10 @@ export function MurDuMois({
   const lignes = Math.ceil((decalage + jours.length) / 7)
 
   const largeur = 7 * COTE + 6 * ESPACE
-  const hauteur = lignes * COTE + (lignes - 1) * ESPACE
+  // Deux dixièmes de plus que la dernière rangée : le trait du jour courant se
+  // dessine SOUS sa case, et il serait rogné si le mois se terminait un jour
+  // de la dernière ligne.
+  const hauteur = lignes * COTE + (lignes - 1) * ESPACE + 2
 
   return (
     <figure>
@@ -74,16 +82,16 @@ export function MurDuMois({
 
           const cestAujourdhui = jour === aujourdhui()
           const passe = jour < aujourdhui()
+          const rate = programme && passe && palier === 0
           const teinte =
             score !== null && score >= 1
               ? 'var(--reussite)'
-              : programme && passe && palier === 0
+              : rate
                 ? 'var(--echec)'
-                : 'var(--texte)'
-          // Une journée vide n'a rien à remplir : on teinte alors son contour,
-          // sinon le rouge n'aurait nulle part où s'afficher.
-          const contour =
-            programme && passe && palier === 0 ? 'var(--echec)' : 'var(--trait)'
+                : 'var(--accent)'
+          // Une journée ratée n'a rien à remplir : la rainure elle-même passe
+          // au rouge pâle, sinon le rouge n'aurait nulle part où s'afficher.
+          const rainure = rate ? 'var(--echec-fond)' : 'var(--trait)'
 
           return (
             <g key={jour}>
@@ -92,9 +100,8 @@ export function MurDuMois({
                 y={y}
                 width={COTE}
                 height={COTE}
-                fill="none"
-                stroke={contour}
-                strokeWidth={0.6}
+                rx={2}
+                fill={rainure}
               />
               {palier > 0 ? (
                 <rect
@@ -102,6 +109,7 @@ export function MurDuMois({
                   y={y + COTE - remplissage}
                   width={COTE}
                   height={remplissage}
+                  rx={2}
                   fill={teinte}
                 />
               ) : null}
@@ -111,10 +119,11 @@ export function MurDuMois({
               {cestAujourdhui ? (
                 <rect
                   x={x}
-                  y={y + COTE + 0.6}
+                  y={y + COTE + 0.8}
                   width={COTE}
-                  height={0.8}
-                  fill="var(--texte)"
+                  height={1}
+                  rx={0.5}
+                  fill="var(--accent)"
                 />
               ) : null}
               <title>

@@ -195,7 +195,7 @@ export function FormulaireAjustement({ comptes }: { comptes: Compte[] }) {
       </Champ>
 
       {confirme ? (
-        <p role="alert" className="mt-4 border-l-2 border-l-texte pl-3 text-13">
+        <p role="alert" className="mt-4 rounded-petit bg-important-fond p-3 text-13 text-important">
           L&apos;écart dépasse 100 €. C&apos;est presque toujours une faute de frappe.
           Toucher à nouveau pour confirmer la création de l&apos;écriture.
         </p>

@@ -20,7 +20,7 @@ pas touché du tout**, pas un commit, pas un fichier. Son monitoring continue.
 | Données | Supabase Postgres + Storage, projet créé maintenant. |
 | Authentification | **Pas de magic link.** Mot de passe unique + cookie signé 1 an. |
 | Import | Écran d'import **CSV générique** avec association de colonnes. |
-| Emoji des habitudes | **Conservés en couleur** — seule entorse assumée au monochrome. |
+| Emoji des habitudes | **Conservés en couleur**, et devenus la règle : chaque carte porte le sien, c'est le repère qu'on attrape au balayage avant d'avoir lu le titre. |
 | Portée | **Les 5 phases**, en une session, un commit par phase. |
 
 ### Mise en place du dépôt
@@ -98,47 +98,75 @@ au rendu, les écritures en POST. Pas de `services/`, pas de `repositories/`.
 
 ## Direction artistique — appliquée par l'outillage
 
-Ce que la DA interdit **n'existera pas dans Tailwind**. `src/app/globals.css` :
+> **Révision d'août 2026.** La première version était monochrome : aucun rayon,
+> aucune ombre, aucune teinte, l'information portée par le seul remplissage en
+> Encre. Elle était cohérente et elle était illisible à l'usage — un tableau de
+> bord entièrement gris ne dit pas où regarder. Le système ci-dessous la
+> remplace. La méthode, elle, n'a pas changé : ce que la DA n'autorise pas
+> n'existe pas dans Tailwind.
+
+`src/app/globals.css` vide les espaces de noms puis redéclare les seules
+valeurs du système. Après ça, `text-red-500`, `rounded-xl` et `shadow-2xl` ne
+compilent pas.
 
 ```css
-@import "tailwindcss";
+@theme {
+  --color-*: initial;  --radius-*: initial;  --shadow-*: initial;
+  --text-*: initial;   --font-*: initial;    --blur-*: initial;
 
-:root { --fond:#FBFBF9; --texte:#0A0A0B; --secondaire:#75757C; --trait:#E6E6E2; }
-@media (prefers-color-scheme: dark) {
-  :root { --fond:#0E0E10; --texte:#FBFBF9; --secondaire:#75757C; --trait:#232327; }
+  --radius-petit: 6px;   /* cases, pastilles, champs */
+  --radius-carte: 10px;  /* tout ce qui est un bloc */
+  --radius-plein: 999px; /* pilules et jauges */
 }
 
 @theme inline {
-  --color-fond: var(--fond);
-  --color-texte: var(--texte);          /* Encre : texte ET remplissage */
-  --color-secondaire: var(--secondaire);
-  --color-trait: var(--trait);
-
-  --font-sans: var(--police-inter-tight), ui-sans-serif, system-ui;
-  --font-mono: var(--police-geist-mono), ui-monospace, monospace;
-
-  --text-11:11px; --text-13:13px; --text-15:15px;
-  --text-18:18px; --text-24:24px; --text-40:40px; --text-72:72px;
-
-  --radius-*: initial;   /* rounded-* cesse d'exister */
-  --shadow-*: initial;   /* shadow-*  cesse d'exister */
-  --color-red-*: initial; --color-green-*: initial; /* … toutes les palettes */
+  --color-carte: var(--carte);          /* le blanc qui se détache du fond */
+  --color-accent: var(--accent);        /* le bleu des gestes */
+  --color-urgent: var(--urgent);        /* … et son fond pâle -urgent-fond */
+  --shadow-carte: var(--ombre);         /* une ombre, et une seule */
 }
 ```
 
-`@theme inline` fait pointer les utilitaires sur la variable et non sur sa valeur :
-la bascule clair/sombre tient dans la seule media query, sans classe `dark:`.
+`@theme inline` fait pointer les utilitaires sur la variable et non sur sa
+valeur : la bascule clair/sombre tient dans la seule media query, sans classe
+`dark:`.
 
-**Piège Tailwind v4 à traiter dès la phase 1 :** la couleur de bordure par défaut
-est passée de `gray-200` à `currentColor`. Dans un design entièrement fait de
-filets, chaque `border` rendrait du noir pur. Règle : toujours `border-trait`,
-jamais `border` seul. Une règle ESLint le vérifie.
+### Les couleurs disent trois choses
 
-Reste : polices `next/font/google` auto-hébergées ; marge `px-5` ; grille 8px ;
-transition unique `120ms ease-out` neutralisée sous `prefers-reduced-motion` ;
-case cochée en `scale(0)→scale(1)`, `transform-origin: center`, donc remplie du
-centre vers les bords ; tous les nombres en `font-mono` ; libellés de widget en
-`text-11 uppercase tracking-[0.08em] text-secondaire`.
+| Famille | Ce qu'elle signifie | Où |
+|---|---|---|
+| **Bleu** (`accent`) | *une action que j'ai faite, l'endroit où je suis* | case cochée, onglet actif, bouton principal, anneau en cours, champ au focus |
+| **Vert / rouge** (`reussite`, `echec`) | *un verdict sur une période close* | jour plein, série tenue, mur du mois, échéance dépassée, solde négatif |
+| **Étiquettes** (`urgent`, `important`, `neutre`) | *une priorité Eisenhower* | badges en fond pâle avec pastille, jamais en aplat |
+
+La distinction bleu/vert n'est pas décorative. Avant, la case cochée était
+verte : elle disait « bravo » à chaque clic, et il ne restait plus rien pour
+dire « la journée est bonne ». Une couleur qui ne rentre dans aucune de ces
+trois cases n'a pas lieu d'être.
+
+### La carte
+
+Toute l'interface est une pile de cartes blanches sur un fond sourd
+(`#f7f7f5`), séparées par un `gap-3` porté par le layout et non par les
+cartes. Géométrie définie **une seule fois**, dans la classe `.carte` :
+bordure `--trait`, rayon `--rayon`, ombre `--ombre`. Deux cartes légèrement
+différentes sur le même écran se voient et se lisent comme un bug d'affichage.
+
+Les primitives qui en découlent : `Carte` / `EnTeteCarte` (emoji + titre +
+action), `Widget` (leur assemblage, appelé par les vingt et quelques widgets),
+`Badge` / `BadgePriorite`, `Jauge` et `Barre` (le pourcentage à gauche, en
+chiffres tabulaires de largeur fixe, pour que la colonne reste comparable),
+`Onglets` (vues exclusives, segment actif en carte blanche dans une rainure),
+`Pilule` / `BarreFiltres` (filtres cumulables).
+
+**Piège Tailwind v4 traité en phase 1 :** la couleur de bordure par défaut est
+passée de `gray-200` à `currentColor`. Règle : toujours `border-trait`, jamais
+`border` seul. Une règle ESLint le vérifie.
+
+Reste : polices `next/font/google` auto-hébergées ; grille 8px ; transition
+unique `120ms ease-out` neutralisée sous `prefers-reduced-motion` ; case cochée
+en `scale(0)→scale(1)` avec `transform-origin: center`, donc remplie du centre
+vers les bords ; tous les nombres en `font-mono`.
 
 Discipline iOS obligatoire, `input, select, textarea { font-size: 16px }` — en
 dessous, Safari zoome le viewport à la mise au point et n'en revient jamais.
@@ -149,9 +177,13 @@ SVG à la main, une case par jour **du mois réel** (28 à 31), sur **7 colonnes
 alignées sur les jours de la semaine** plutôt qu'un bloc de 30 : à encombrement
 égal, l'alignement hebdomadaire fait ressortir le motif des week-ends.
 
-Case = carré bordé en Trait ; le score est un `<rect>` plein en Encre **monté
-depuis le bas**, hauteur `palier/5` avec `palier = ceil(score × 5)`. Pas
-d'opacité, pas de gris, pas de gradient : un remplissage littéral.
+Case = rainure grise pleine aux coins arrondis ; le score est un `<rect>`
+**monté depuis le bas**, hauteur `palier/5` avec `palier = ceil(score × 5)`.
+Pas d'opacité, pas de gradient : un remplissage littéral. Vert quand la journée
+est pleine, rouge quand elle est restée vide alors que quelque chose était
+demandé, bleu entre les deux. Une rainure pleine plutôt qu'un contour vide :
+à cette taille, un carré vidé par un filet se lit comme une absence de donnée,
+pas comme un jour à zéro.
 
 Un jour sans aucune habitude programmée rend `score = null` → tiret, pas zéro.
 « Rien ne vous était demandé » n'est pas « vous avez échoué ».
@@ -160,7 +192,7 @@ Un jour sans aucune habitude programmée rend `score = null` → tiret, pas zér
 
 ## Navigation
 
-Barre basse **texte seul, sans icône** — un glyphe monochrome 1px à 24px est
+Barre basse **texte seul, sans icône** — un glyphe de 1px à 24px est
 ambigu, un mot ne l'est pas, et c'est plus proche de l'esprit du brief.
 Quatre créneaux de ~97 × 52px (+ `env(safe-area-inset-bottom)`), donc bien
 au-delà des 44px :
@@ -173,9 +205,9 @@ listant les 13 sections en lignes de 56px, **les plus utilisées en bas** — c'
 là que le pouce arrive — et fermé par une ligne « Fermer » en bas, elle aussi
 atteignable.
 
-Actif = filet supérieur 2px + graisse 600. Section courante dans le panneau =
-inversion complète (fond Encre, texte Papier). L'inversion est le seul
-surlignage dont dispose un système monochrome : on ne le dépense qu'une fois.
+Actif = bleu d'accent + graisse 600, la même couleur que les cases qu'on coche :
+dans les deux cas elle dit « c'est là que je suis ». Section courante dans le
+panneau = fond bleu pâle.
 
 Un bouton retour 44 × 44 est obligatoire sur les écrans de détail : en mode
 standalone il n'y a pas de bouton retour du navigateur et le geste de bord iOS
@@ -438,7 +470,7 @@ autonome sous son propre `<Suspense>`, ses lectures enveloppées dans `cache()`
   clés en place : connexion, cochage d'habitude, ajustement de solde, virement,
   report de tâche, import CSV.
 - Captures en clair et en sombre pour contrôler polices, échelle typographique,
-  absence de rayon et d'ombre.
+  fermeture des espaces de noms et rendu réel de la carte.
 - Grep de non-régression : aucun `current_date`, aucun `toISOString().slice`.
 
 ## Ce dont j'ai besoin de vous

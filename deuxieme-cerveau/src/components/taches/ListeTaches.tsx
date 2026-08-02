@@ -4,9 +4,9 @@ import Link from 'next/link'
 import { useOptimistic, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Case } from '@/components/ui/Case'
+import { Badge, BadgePriorite } from '@/components/ui/Badge'
 import { completerTache, reporterTache } from '@/lib/actions/taches'
 import { aujourdhui, jourRelatif } from '@/lib/date'
-import { MARQUE_PRIORITE, type Priorite } from '@/lib/enums'
 import type { Tache } from '@/lib/donnees/taches'
 
 /**
@@ -68,14 +68,15 @@ export function ListeTaches({
     <ul aria-busy={enCours}>
       {affichees.map((tache) => {
         const enRetard = tache.echeance !== null && tache.echeance < jour
-        const marque = MARQUE_PRIORITE[(tache.priorite ?? 0) as Priorite]
 
         return (
           <li
             key={tache.id}
             className={[
               'flex items-center gap-1 border-b border-trait last:border-b-0',
-              enRetard ? 'border-l-2 border-l-texte pl-2' : '',
+              // Le filet rouge à gauche remplace la marque « !! » : il se voit
+              // en balayant la liste, sans occuper de place dans le titre.
+              enRetard ? 'border-l-2 border-l-echec pl-2' : '',
             ].join(' ')}
           >
             <Case
@@ -89,22 +90,20 @@ export function ListeTaches({
               className="min-w-0 flex-1 py-2"
               prefetch={false}
             >
-              <span className="flex items-baseline gap-2">
-                {marque ? (
-                  <span aria-hidden className="chiffres shrink-0 text-13">
-                    {marque}
-                  </span>
-                ) : null}
-                <span className="truncate text-15">{tache.titre}</span>
-              </span>
+              <span className="block truncate text-15">{tache.titre}</span>
 
-              <span className="mt-0.5 flex items-baseline gap-2 text-11 text-secondaire">
+              <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-11 text-secondaire">
+                <BadgePriorite priorite={tache.priorite} />
                 {tache.echeance ? (
-                  <span className={enRetard ? 'text-texte' : undefined}>
+                  <span
+                    className={enRetard ? 'font-medium text-echec' : undefined}
+                  >
                     {jourRelatif(tache.echeance, jour)}
                   </span>
                 ) : null}
-                {tache.projetNom ? <span className="truncate">{tache.projetNom}</span> : null}
+                {tache.projetNom ? (
+                  <Badge pastille={false}>{tache.projetNom}</Badge>
+                ) : null}
                 {tache.recurrence ? <span aria-label="récurrente">↻</span> : null}
               </span>
             </Link>

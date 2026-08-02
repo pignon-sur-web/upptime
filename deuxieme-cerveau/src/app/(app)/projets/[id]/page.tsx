@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { EnTeteSection } from '@/components/nav/EnTete'
+import { Carte } from '@/components/ui/Carte'
 import { Invitation, Widget } from '@/components/ui/Widget'
 import { Jauge } from '@/components/ui/Jauge'
 import { Saisie } from '@/components/ui/Champ'
@@ -33,7 +34,7 @@ export default async function PageProjet({
     <>
       <EnTeteSection titre={projet.nom} retour="/projets" />
 
-      <div className="border-b border-trait px-5 py-4">
+      <Carte>
         <div className="flex items-end justify-between gap-4">
           <p className="chiffres text-40 leading-none">
             {projet.avancement === null ? '—' : Math.round(projet.avancement * 100)}
@@ -70,12 +71,12 @@ export default async function PageProjet({
             </span>
           ) : null}
         </div>
-      </div>
+      </Carte>
 
       <Widget
         libelle="Tâches ouvertes"
         action={
-          <Link href={`/taches?vue=toutes&projet=${id}`} className="libelle">
+          <Link href={`/taches?vue=toutes&projet=${id}`} className="action">
             Tout voir
           </Link>
         }

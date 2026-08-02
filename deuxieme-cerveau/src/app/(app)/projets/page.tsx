@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { EnTeteSection } from '@/components/nav/EnTete'
+import { Onglets } from '@/components/ui/Pilule'
 import { Invitation, Widget } from '@/components/ui/Widget'
 import { Jauge } from '@/components/ui/Jauge'
 import { listerProjets } from '@/lib/donnees/projets'
@@ -21,26 +22,19 @@ export default async function PageProjets({
       <EnTeteSection
         titre="Projets"
         action={
-          <Link href="/projets/nouveau" className="libelle">
+          <Link href="/projets/nouveau" className="action">
             Nouveau
           </Link>
         }
       />
 
-      <div className="flex gap-4 border-b border-trait px-5 py-3 text-13">
-        <Link
-          href="/projets"
-          className={tous === '1' ? 'text-secondaire' : 'text-texte underline'}
-        >
-          En cours
-        </Link>
-        <Link
-          href="/projets?tous=1"
-          className={tous === '1' ? 'text-texte underline' : 'text-secondaire'}
-        >
-          Tous
-        </Link>
-      </div>
+      <Onglets
+        libelle="Portée"
+        onglets={[
+          { href: '/projets', libelle: 'En cours', actif: tous !== '1' },
+          { href: '/projets?tous=1', libelle: 'Tous', actif: tous === '1' },
+        ]}
+      />
 
       <Widget libelle={`${projets.length} projet${projets.length > 1 ? 's' : ''}`}>
         {projets.length === 0 ? (

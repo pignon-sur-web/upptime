@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { EnTeteSection } from '@/components/nav/EnTete'
+import { Onglets } from '@/components/ui/Pilule'
 import { Invitation, Widget } from '@/components/ui/Widget'
 import { BoutonPrincipal, Champ, Menu, Saisie, Zone } from '@/components/ui/Champ'
 import { clients, SEUIL_RELANCE_JOURS, type Client } from '@/lib/donnees/vie'
@@ -36,20 +36,13 @@ export default async function PageClients({
     <>
       <EnTeteSection titre="Clients" />
 
-      <div className="flex gap-4 border-b border-trait px-5 py-3 text-13">
-        <Link
-          href="/clients"
-          className={tous === '1' ? 'text-secondaire' : 'text-texte underline'}
-        >
-          En cours
-        </Link>
-        <Link
-          href="/clients?tous=1"
-          className={tous === '1' ? 'text-texte underline' : 'text-secondaire'}
-        >
-          Tous
-        </Link>
-      </div>
+      <Onglets
+        libelle="Portée"
+        onglets={[
+          { href: '/clients', libelle: 'En cours', actif: tous !== '1' },
+          { href: '/clients?tous=1', libelle: 'Tous', actif: tous === '1' },
+        ]}
+      />
 
       {aRelancer.length > 0 ? (
         <Widget
@@ -158,7 +151,7 @@ function LigneClient({ client, alerte = false }: { client: Client; alerte?: bool
     <li
       className={[
         'border-b border-trait py-3 last:border-b-0',
-        alerte ? 'border-l-2 border-l-texte pl-3' : '',
+        alerte ? 'border-l-2 border-l-echec pl-3' : '',
       ].join(' ')}
     >
       <div className="flex items-baseline justify-between gap-4">

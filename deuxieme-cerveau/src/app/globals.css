@@ -10,38 +10,66 @@
    ————————————————————————————————————————————————————————————————— */
 
 :root {
-  --fond: #fbfbf9; /* Papier */
-  --texte: #0a0a0b; /* Encre — texte ET remplissage */
-  --secondaire: #75757c; /* Graphite */
-  --trait: #e6e6e2; /* Trait */
+  --fond: #f7f7f5; /* le fond de page, légèrement plus sourd que les cartes */
+  --carte: #ffffff; /* les cartes s'en détachent */
+  --texte: #1a1a19;
+  --secondaire: #7c7c78;
+  --trait: #e9e9e6;
+
+  /* Les couleurs de statut. Chacune a un ton plein pour le texte et la
+     pastille, et un fond très pâle pour le badge : c'est ce qui rend une
+     étiquette lisible sans qu'elle crie. */
+  --urgent: #c0392b;
+  --urgent-fond: #fdecea;
+  --important: #b7791f;
+  --important-fond: #fdf3e0;
+  --secondaire-badge: #6b7280;
+  --secondaire-badge-fond: #f0f0ef;
+  --accent: #2f6fd0; /* les cases à cocher, les liens */
+  --accent-fond: #e8f0fc;
 
   /* Deux couleurs, et deux seulement : ce qui a réussi, ce qui a raté.
      Elles ne décorent rien — partout où elles apparaissent, elles portent
      un jugement que le noir et blanc ne pouvait pas porter seul. Tout le
      reste de l'interface reste en Encre sur Papier. */
-  --reussite: #14794a;
-  --echec: #b3261e;
-  /* Fonds très pâles, pour teinter une ligne sans écraser son texte. */
-  --reussite-fond: #e6f4ec;
-  --echec-fond: #fbeae9;
+  --reussite: #1a7f4b;
+  --echec: #c0392b;
+  --reussite-fond: #e7f5ee;
+  --echec-fond: #fdecea;
+
+  --rayon: 10px;
+  --rayon-petit: 6px;
+  --ombre: 0 1px 2px rgb(15 15 15 / 0.05), 0 2px 8px rgb(15 15 15 / 0.04);
 
   --duree: 120ms;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --fond: #0e0e10; /* Nuit */
-    --texte: #fbfbf9;
-    --secondaire: #75757c;
-    --trait: #232327; /* Trait nuit */
+    --fond: #131316;
+    --carte: #1b1b1f;
+    --texte: #ececea;
+    --secondaire: #8d8d92;
+    --trait: #2a2a30;
 
-    /* Sur fond noir, les mêmes teintes seraient illisibles : on remonte la
+    --urgent: #f08a80;
+    --urgent-fond: #331d1a;
+    --important: #e3b341;
+    --important-fond: #332a15;
+    --secondaire-badge: #9ca3af;
+    --secondaire-badge-fond: #26262b;
+    --accent: #6ea8fe;
+    --accent-fond: #16233a;
+
+    /* Sur fond sombre, les mêmes teintes seraient illisibles : on remonte la
        luminosité et on baisse la saturation. Le contraste reste au-dessus de
        4,5:1 dans les deux thèmes. */
     --reussite: #4cc38a;
-    --echec: #f2726a;
+    --echec: #f08a80;
     --reussite-fond: #14291f;
-    --echec-fond: #2b1614;
+    --echec-fond: #331d1a;
+
+    --ombre: 0 1px 2px rgb(0 0 0 / 0.4), 0 2px 8px rgb(0 0 0 / 0.3);
   }
 }
 
@@ -52,12 +80,18 @@
 }
 
 /* —————————————————————————————————————————————————————————————————
-   Ce que la direction artistique interdit n'existe pas dans Tailwind.
+   Ce que la direction artistique n'autorise pas n'existe pas dans
+   Tailwind.
 
    Vider un espace de noms avec `initial` supprime les utilitaires
-   correspondants : après ça, `rounded-lg`, `shadow-md` et `text-red-500`
-   ne compilent plus. La règle n'est plus une consigne, c'est une
-   contrainte de l'outil.
+   correspondants ; les quelques valeurs redéclarées juste après sont
+   alors les SEULES qui compilent. `text-red-500` et `shadow-2xl`
+   n'existent pas ; `rounded-carte` et `ombre-carte` oui. La règle
+   n'est pas une consigne, c'est une contrainte de l'outil.
+
+   L'échelle des rayons tient en trois valeurs et celle des ombres en
+   une seule : c'est ce qui empêche l'interface de dériver vers un
+   assemblage de cartes toutes légèrement différentes.
    ————————————————————————————————————————————————————————————————— */
 
 @theme {
@@ -73,6 +107,12 @@
 
   --color-transparent: transparent;
   --color-current: currentColor;
+
+  /* Trois rayons. `petit` pour les cases et les pastilles, `carte` pour
+     tout ce qui est un bloc, `plein` pour les ronds. */
+  --radius-petit: 6px;
+  --radius-carte: 10px;
+  --radius-plein: 999px;
 
   /* Échelle typographique imposée : 11 / 13 / 15 / 18 / 24 / 40 / 72. */
   --text-11: 11px;
@@ -102,10 +142,23 @@
   --color-texte: var(--texte);
   --color-secondaire: var(--secondaire);
   --color-trait: var(--trait);
+  --color-carte: var(--carte);
   --color-reussite: var(--reussite);
   --color-echec: var(--echec);
   --color-reussite-fond: var(--reussite-fond);
   --color-echec-fond: var(--echec-fond);
+  --color-urgent: var(--urgent);
+  --color-urgent-fond: var(--urgent-fond);
+  --color-important: var(--important);
+  --color-important-fond: var(--important-fond);
+  --color-neutre: var(--secondaire-badge);
+  --color-neutre-fond: var(--secondaire-badge-fond);
+  --color-accent: var(--accent);
+  --color-accent-fond: var(--accent-fond);
+
+  /* Une seule ombre, et elle suit le thème : sur fond sombre, une ombre
+     grise éclaircit au lieu d'enfoncer. */
+  --shadow-carte: var(--ombre);
 
   --font-sans: var(--police-interface), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--police-chiffres), ui-monospace, monospace;
@@ -114,21 +167,6 @@
 /* —————————————————————————————————————————————————————————————————
    Base
    ————————————————————————————————————————————————————————————————— */
-
-/* Vider les espaces de noms ci-dessus supprime `rounded-lg` et `shadow-md`,
-   mais pas les utilités statiques de Tailwind : `rounded`, `rounded-full`,
-   `shadow` et `ring` ont leurs propres valeurs en dur et survivent.
-   Cette règle est volontairement hors de toute `@layer` — dans la cascade,
-   une déclaration sans couche l'emporte sur n'importe quelle déclaration en
-   couche, quelle que soit sa spécificité.
-   Seule limite connue et acceptée : un utilitaire forcé (`rounded-full!`)
-   passerait quand même, `!important` battant une règle hors couche. */
-*,
-::before,
-::after {
-  border-radius: 0;
-  box-shadow: none;
-}
 
 @layer base {
   html {
@@ -187,6 +225,17 @@
 }
 
 @layer components {
+  /* Le bloc. Toute l'interface est faite de ces cartes posées sur le fond
+     sourd : c'est la seule façon dont un contenu se détache. La géométrie
+     est ici et nulle part ailleurs — un widget qui redéfinirait son rayon
+     ou son ombre casserait l'alignement visuel de la page entière. */
+  .carte {
+    background-color: var(--carte);
+    border: 1px solid var(--trait);
+    border-radius: var(--rayon);
+    box-shadow: var(--ombre);
+  }
+
   /* La transition unique de l'application : 120 ms, ease-out, sur les
      changements d'état. Rien d'autre ne bouge. */
   .transition-etat {
@@ -195,7 +244,33 @@
     transition-timing-function: ease-out;
   }
 
-  /* Libellé de widget : 11px, majuscules, interlettrage +0.08em, Graphite. */
+  /* Le lien d'action d'un en-tête de carte : « Détail », « Ajouter ».
+     En bleu et en casse normale, pas en petites majuscules grises — un
+     libellé gris se lit comme une étiquette, pas comme quelque chose sur
+     quoi on peut appuyer, et c'est précisément le geste qu'on cherche. */
+  .action {
+    font-size: 13px;
+    line-height: 20px;
+    color: var(--accent);
+  }
+
+  /* Les actions soulignées passent en bleu, avec un soulignement adouci et
+     décollé de la ligne de base.
+
+     La règle vit dans la couche `components`, donc n'importe quel utilitaire
+     de couleur la bat — `text-secondaire` en particulier. C'est ce qui fait
+     que « Supprimer » ou « Revenir aux colonnes » restent gris pendant que
+     « Ajouter une tâche » devient bleu, sans avoir à écrire la couleur sur
+     chacun des quarante liens de l'application. */
+  a.underline,
+  button.underline {
+    color: var(--accent);
+    text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    text-underline-offset: 2px;
+  }
+
+  /* Libellé de section : 11px, majuscules, interlettrage +0.08em, Graphite.
+     Réservé aux intitulés qui ne sont PAS cliquables. */
   .libelle {
     font-size: 11px;
     line-height: 16px;

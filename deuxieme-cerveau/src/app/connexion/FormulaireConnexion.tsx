@@ -44,7 +44,7 @@ function BoutonEnvoyer() {
     <button
       type="submit"
       disabled={pending}
-      className="transition-etat mt-6 h-12 w-full border border-texte bg-texte text-15 text-fond disabled:opacity-40"
+      className="transition-etat mt-6 h-12 w-full rounded-petit bg-accent text-15 font-medium text-carte disabled:opacity-40"
     >
       {pending ? 'Vérification…' : 'Entrer'}
     </button>

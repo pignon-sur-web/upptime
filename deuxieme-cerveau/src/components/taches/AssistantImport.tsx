@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { BoutonPrincipal, Champ, Menu, Zone } from '@/components/ui/Champ'
+import { Carte } from '@/components/ui/Carte'
 import { Widget } from '@/components/ui/Widget'
 import {
   analyserCSV,
@@ -140,30 +141,38 @@ export function AssistantImport() {
 
   return (
     <>
-      <ol className="flex border-b border-trait" aria-label="Étapes">
+      {/* L'étape franchie garde la couleur d'accent : le chemin déjà parcouru
+          reste visible, ce qui rend le « revenir en arrière » évident. */}
+      <ol className="flex gap-1 rounded-carte bg-neutre-fond p-1" aria-label="Étapes">
         {ETAPES.map((e, i) => {
           const rang = ETAPES.findIndex((x) => x.cle === etape)
           const atteinte = i <= rang
+          const courante = e.cle === etape
           return (
             <li
               key={e.cle}
-              aria-current={e.cle === etape ? 'step' : undefined}
+              aria-current={courante ? 'step' : undefined}
               className={[
-                'cible flex flex-1 items-center justify-center gap-1 border-t-2 text-11',
-                e.cle === etape
-                  ? 'border-t-texte font-medium'
-                  : 'border-t-transparent text-secondaire',
+                'flex flex-1 items-center justify-center gap-1 rounded-petit py-2 text-11',
+                courante
+                  ? 'bg-carte font-medium text-texte shadow-carte'
+                  : atteinte
+                    ? 'text-accent'
+                    : 'text-secondaire',
               ].join(' ')}
             >
               <span className="chiffres">{i + 1}</span>
-              <span className={atteinte ? undefined : 'text-secondaire'}>{e.libelle}</span>
+              <span>{e.libelle}</span>
             </li>
           )
         })}
       </ol>
 
       {erreur ? (
-        <p role="alert" className="border-b border-trait px-5 py-3 text-13">
+        <p
+          role="alert"
+          className="carte border-echec bg-echec-fond p-3 text-13 text-echec"
+        >
           {erreur}
         </p>
       ) : null}
@@ -462,7 +471,7 @@ function EtapeApercu({
         </Widget>
       ) : null}
 
-      <div className="px-5 py-6">
+      <Carte>
         <BoutonPrincipal
           type="button"
           disabled={enCours || retenues.length === 0}
@@ -473,7 +482,7 @@ function EtapeApercu({
         <button type="button" onClick={onRetour} className="cible mt-2 text-13 underline">
           Revenir aux colonnes
         </button>
-      </div>
+      </Carte>
     </>
   )
 }

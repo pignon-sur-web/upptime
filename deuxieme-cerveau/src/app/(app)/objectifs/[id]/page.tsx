@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { EnTeteSection } from '@/components/nav/EnTete'
+import { Carte } from '@/components/ui/Carte'
 import { Invitation, Widget } from '@/components/ui/Widget'
 import { Jauge } from '@/components/ui/Jauge'
 import { BoutonPrincipal, Champ, Menu, Saisie } from '@/components/ui/Champ'
@@ -40,7 +41,7 @@ export default async function PageObjectif({
     <>
       <EnTeteSection titre={objectif.nom} retour="/objectifs" />
 
-      <div className="border-b border-trait px-5 py-4">
+      <Carte>
         <p className="chiffres text-40 leading-none">
           {objectif.progression === null ? '—' : Math.round(objectif.progression * 100)}
           {objectif.progression === null ? null : (
@@ -55,7 +56,7 @@ export default async function PageObjectif({
           {objectif.categorie ? <span>{objectif.categorie}</span> : null}
           {objectif.echeance ? <span>{jourRelatif(objectif.echeance)}</span> : null}
         </p>
-      </div>
+      </Carte>
 
       <Widget
         libelle="Résultats clés"

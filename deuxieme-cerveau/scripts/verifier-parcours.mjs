@@ -159,15 +159,18 @@ for (const schema of ['light', 'dark']) {
     })
     verifier('Inter Tight appliquée à l’interface', /Inter[ _]?Tight/i.test(polices.interface), polices.interface.slice(0, 40))
     verifier('Geist Mono appliquée aux chiffres', /Geist[ _]?Mono/i.test(polices.chiffres), polices.chiffres.slice(0, 40))
-    verifier('fond Papier en clair', polices.fond === 'rgb(251, 251, 249)', polices.fond)
-    verifier('texte Encre en clair', polices.texte === 'rgb(10, 10, 11)', polices.texte)
+    // Les quatre valeurs viennent de `globals.css`. Elles sont recopiées ici
+    // en dur et non relues du fichier : le but est justement de constater un
+    // écart entre la palette écrite et la palette rendue.
+    verifier('fond clair', polices.fond === 'rgb(247, 247, 245)', polices.fond)
+    verifier('texte clair', polices.texte === 'rgb(26, 26, 25)', polices.texte)
   } else {
     const couleurs = await page.evaluate(() => ({
       fond: getComputedStyle(document.body).backgroundColor,
       texte: getComputedStyle(document.body).color,
     }))
-    verifier('fond Nuit en sombre', couleurs.fond === 'rgb(14, 14, 16)', couleurs.fond)
-    verifier('texte Papier en sombre', couleurs.texte === 'rgb(251, 251, 249)', couleurs.texte)
+    verifier('fond sombre', couleurs.fond === 'rgb(19, 19, 22)', couleurs.fond)
+    verifier('texte sombre', couleurs.texte === 'rgb(236, 236, 234)', couleurs.texte)
   }
 
   await ctx.close()

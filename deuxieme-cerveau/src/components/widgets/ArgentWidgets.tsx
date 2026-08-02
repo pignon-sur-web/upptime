@@ -27,8 +27,9 @@ export async function ComptesWidget() {
   return (
     <Widget
       libelle="Comptes"
+      emoji="🏦"
       action={
-        <Link href="/argent" className="libelle">
+        <Link href="/argent" className="action">
           Détail
         </Link>
       }
@@ -63,8 +64,9 @@ export async function MoisEnArgentWidget() {
   return (
     <Widget
       libelle={`Le mois — ${moisLong(aujourdhui())}`}
+      emoji="💶"
       action={
-        <Link href="/argent" className="libelle">
+        <Link href="/argent" className="action">
           Saisir
         </Link>
       }
@@ -106,6 +108,7 @@ export async function PaiementsAVenirWidget() {
   return (
     <Widget
       libelle="Paiements à venir"
+      emoji="📆"
       action={<span className="chiffres text-13">{euros(-total)}</span>}
     >
       <ul>
@@ -116,7 +119,7 @@ export async function PaiementsAVenirWidget() {
               key={echeance.id}
               className={[
                 'flex items-baseline justify-between gap-4 border-b border-trait py-1.5 last:border-b-0',
-                enRetard ? 'border-l-2 border-l-texte pl-2' : '',
+                enRetard ? 'border-l-2 border-l-echec pl-2' : '',
               ].join(' ')}
             >
               <span className="min-w-0">

@@ -19,8 +19,13 @@ export default function LayoutApplication({
   return (
     <div className="min-h-ecran">
       {/* Une colonne sur mobile, centrée et bornée au-delà : le contenu ne
-          s'étale jamais sur toute la largeur d'un écran d'ordinateur. */}
-      <main className="mx-auto max-w-2xl pb-28">{children}</main>
+          s'étale jamais sur toute la largeur d'un écran d'ordinateur.
+          L'espacement entre les cartes est porté ici et pas par les cartes :
+          c'est ce qui garantit qu'il est le même partout, y compris entre
+          deux cartes rendues par des composants qui s'ignorent. */}
+      <main className="mx-auto flex max-w-2xl flex-col gap-3 px-3 pb-28">
+        {children}
+      </main>
       <BarreOnglets />
     </div>
   )

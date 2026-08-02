@@ -1,4 +1,5 @@
 import { EnTeteSection } from '@/components/nav/EnTete'
+import { Carte } from '@/components/ui/Carte'
 import { FormulaireTache } from '@/components/taches/FormulaireTache'
 import { optionsProjets } from '@/lib/donnees/projets'
 import { creerTacheEtRevenir } from '@/lib/actions/taches'
@@ -19,14 +20,14 @@ export default async function PageNouvelleTache({
         titre={parent ? 'Nouvelle sous-tâche' : 'Nouvelle tâche'}
         retour="/taches"
       />
-      <div className="px-5 py-4">
+      <Carte>
         <FormulaireTache
           action={creerTacheEtRevenir}
           projets={projets}
           parentId={parent}
           libelleEnvoi="Créer la tâche"
         />
-      </div>
+      </Carte>
     </>
   )
 }

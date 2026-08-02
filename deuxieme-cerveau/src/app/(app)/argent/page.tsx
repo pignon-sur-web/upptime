@@ -1,6 +1,8 @@
 import Link from 'next/link'
+import type { Route } from 'next'
 import { EnTeteSection } from '@/components/nav/EnTete'
 import { Invitation, Widget } from '@/components/ui/Widget'
+import { Onglets } from '@/components/ui/Pilule'
 import { SaisieRapide } from '@/components/finances/SaisieRapide'
 import { ListeTransactions } from '@/components/finances/ListeTransactions'
 import {
@@ -49,32 +51,20 @@ export default async function PageArgent({
       <EnTeteSection
         titre="Argent"
         action={
-          <Link href="/argent/comptes/nouveau" className="libelle">
+          <Link href="/argent/comptes/nouveau" className="action">
             Compte
           </Link>
         }
       />
 
-      <nav className="flex border-b border-trait" aria-label="Vue">
-        {VUES.map((v) => {
-          const actif = v.cle === vue
-          return (
-            <Link
-              key={v.cle}
-              href={v.cle === 'mois' ? '/argent' : `/argent?vue=${v.cle}`}
-              aria-current={actif ? 'page' : undefined}
-              className={[
-                'cible flex flex-1 items-center justify-center border-t-2 text-13',
-                actif
-                  ? 'border-t-texte font-medium'
-                  : 'border-t-transparent text-secondaire',
-              ].join(' ')}
-            >
-              {v.libelle}
-            </Link>
-          )
-        })}
-      </nav>
+      <Onglets
+        libelle="Vue"
+        onglets={VUES.map((v) => ({
+          href: (v.cle === 'mois' ? '/argent' : `/argent?vue=${v.cle}`) as Route,
+          libelle: v.libelle,
+          actif: v.cle === vue,
+        }))}
+      />
 
       {liste.length === 0 ? (
         <Widget libelle="Comptes">
@@ -213,7 +203,7 @@ async function VueMois() {
       <Widget
         libelle="Dépenses par catégorie"
         action={
-          <Link href="/argent?vue=budgets" className="libelle">
+          <Link href="/argent?vue=budgets" className="action">
             Budgets
           </Link>
         }

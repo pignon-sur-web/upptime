@@ -8,14 +8,14 @@ import { ONGLETS, SECTIONS } from '@/lib/sections'
 /**
  * Barre basse, texte seul.
  *
- * Pas d'icônes : un glyphe monochrome de 1px à 24px est ambigu sans étiquette,
- * et une fois l'étiquette ajoutée l'icône ne sert plus à rien. Quatre créneaux
- * pour que chaque cible dépasse largement les 44px sur un écran de 390px.
+ * Pas d'icônes : un glyphe de 1px à 24px est ambigu sans étiquette, et une
+ * fois l'étiquette ajoutée l'icône ne sert plus à rien. Quatre créneaux pour
+ * que chaque cible dépasse largement les 44px sur un écran de 390px.
  *
- * L'onglet actif est marqué par un filet supérieur de 2px et une graisse 500.
- * L'inversion complète est réservée à la section courante dans le panneau : un
- * système monochrome ne dispose que d'un seul surlignage, on ne le dépense
- * qu'une fois.
+ * L'onglet actif est en bleu d'accent — la même couleur que les cases qu'on
+ * coche. C'est cohérent : dans les deux cas, le bleu dit « c'est là que je
+ * suis, c'est ça que j'ai choisi », là où le vert et le rouge portent un
+ * jugement sur une journée.
  */
 export function BarreOnglets() {
   const chemin = usePathname()
@@ -36,7 +36,7 @@ export function BarreOnglets() {
         <PanneauTout chemin={chemin} onFermer={() => setPanneauOuvert(false)} />
       ) : null}
 
-      <nav className="pb-sure fixed inset-x-0 bottom-0 z-40 select-none border-t border-trait bg-fond">
+      <nav className="pb-sure fixed inset-x-0 bottom-0 z-40 select-none border-t border-trait bg-carte">
         <div className="mx-auto flex max-w-2xl">
           {ONGLETS.map((onglet) => {
             const actif =
@@ -51,10 +51,8 @@ export function BarreOnglets() {
                 prefetch={false}
                 aria-current={actif ? 'page' : undefined}
                 className={[
-                  'flex h-13 flex-1 items-center justify-center border-t-2 text-13',
-                  actif
-                    ? 'border-t-texte font-medium text-texte'
-                    : 'border-t-transparent text-secondaire',
+                  'transition-etat flex h-13 flex-1 items-center justify-center text-13',
+                  actif ? 'font-semibold text-accent' : 'text-secondaire',
                 ].join(' ')}
               >
                 {onglet.nom}
@@ -67,10 +65,10 @@ export function BarreOnglets() {
             onClick={() => setPanneauOuvert((ouvert) => !ouvert)}
             aria-expanded={panneauOuvert}
             className={[
-              'flex h-13 flex-1 items-center justify-center border-t-2 text-13',
+              'transition-etat flex h-13 flex-1 items-center justify-center text-13',
               panneauOuvert || dansPanneau
-                ? 'border-t-texte font-medium text-texte'
-                : 'border-t-transparent text-secondaire',
+                ? 'font-semibold text-accent'
+                : 'text-secondaire',
             ].join(' ')}
           >
             Tout
@@ -106,17 +104,19 @@ function PanneauTout({
                   aria-current={actif ? 'page' : undefined}
                   className={[
                     'flex min-h-14 items-center justify-between gap-4 border-b border-trait px-5 py-2',
-                    actif ? 'bg-texte text-fond' : '',
+                    actif ? 'bg-accent-fond' : '',
                   ].join(' ')}
                 >
                   <span>
-                    <span className="block text-15">{section.nom}</span>
                     <span
                       className={[
-                        'block text-13',
-                        actif ? 'text-fond/70' : 'text-secondaire',
+                        'block text-15',
+                        actif ? 'font-medium text-accent' : '',
                       ].join(' ')}
                     >
+                      {section.nom}
+                    </span>
+                    <span className="block text-13 text-secondaire">
                       {section.detail}
                     </span>
                   </span>
@@ -131,7 +131,7 @@ function PanneauTout({
       </div>
 
       {/* Le bouton de fermeture est en bas, là où le pouce arrive. */}
-      <div className="pb-sure border-t border-trait bg-fond">
+      <div className="pb-sure border-t border-trait bg-carte">
         <button
           type="button"
           onClick={onFermer}

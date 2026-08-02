@@ -12,7 +12,7 @@ export async function MurDuMoisWidget() {
   if (scores.every((s) => s.attendues === 0)) return null
 
   return (
-    <Widget libelle={`Le mur — ${moisLong(aujourdhui())}`}>
+    <Widget libelle={`Le mur — ${moisLong(aujourdhui())}`} emoji="🧱">
       <MurDuMois scores={scores} />
     </Widget>
   )
@@ -24,7 +24,7 @@ export async function CourbeHabitudesWidget() {
   if (scores.filter((s) => s.score !== null).length < 2) return null
 
   return (
-    <Widget libelle="Habitudes — 30 jours">
+    <Widget libelle="Habitudes — 30 jours" emoji="📈">
       <Courbe scores={scores} />
     </Widget>
   )

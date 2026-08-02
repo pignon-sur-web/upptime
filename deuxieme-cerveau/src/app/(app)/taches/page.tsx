@@ -2,6 +2,12 @@ import Link from 'next/link'
 import type { Route } from 'next'
 import { EnTeteSection } from '@/components/nav/EnTete'
 import { Invitation, Widget } from '@/components/ui/Widget'
+import {
+  BarreFiltres,
+  Onglets,
+  Pilule,
+  SeparateurFiltres,
+} from '@/components/ui/Pilule'
 import { ListeTaches } from '@/components/taches/ListeTaches'
 import {
   listerTaches,
@@ -46,7 +52,7 @@ export default async function PageTaches({
       <EnTeteSection
         titre="Tâches"
         action={
-          <Link href="/taches/nouvelle" className="libelle">
+          <Link href="/taches/nouvelle" className="action">
             Nouvelle
           </Link>
         }
@@ -54,26 +60,14 @@ export default async function PageTaches({
 
       {/* L'état de la vue est porté par l'URL : l'écran reste utilisable sans
           JavaScript, et le retour arrière ramène là où on était. */}
-      <nav className="flex border-b border-trait" aria-label="Vue">
-        {VUES.map((v) => {
-          const actif = v.cle === vue
-          return (
-            <Link
-              key={v.cle}
-              href={v.cle === 'jour' ? '/taches' : `/taches?vue=${v.cle}`}
-              aria-current={actif ? 'page' : undefined}
-              className={[
-                'cible flex flex-1 items-center justify-center border-t-2 text-13',
-                actif
-                  ? 'border-t-texte font-medium'
-                  : 'border-t-transparent text-secondaire',
-              ].join(' ')}
-            >
-              {v.libelle}
-            </Link>
-          )
-        })}
-      </nav>
+      <Onglets
+        libelle="Vue"
+        onglets={VUES.map((v) => ({
+          href: (v.cle === 'jour' ? '/taches' : `/taches?vue=${v.cle}`) as Route,
+          libelle: v.libelle,
+          actif: v.cle === vue,
+        }))}
+      />
 
       {vue === 'jour' ? <VueJour /> : null}
       {vue === 'semaine' ? <VueSemaine /> : null}
@@ -194,44 +188,36 @@ async function VueToutes({ parametres }: { parametres: Parametres }) {
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-trait px-5 py-3 text-13">
+      <BarreFiltres libelle="Filtres">
         {(['ouvertes', 'faites', 'toutes'] as const).map((s) => (
-          <Link
-            key={s}
-            href={lien({ statut: s })}
-            className={s === statut ? 'text-texte underline' : 'text-secondaire'}
-          >
+          <Pilule key={s} href={lien({ statut: s })} actif={s === statut}>
             {s === 'ouvertes' ? 'Ouvertes' : s === 'faites' ? 'Faites' : 'Tout'}
-          </Link>
+          </Pilule>
         ))}
 
-        <span aria-hidden className="text-trait">
-          |
-        </span>
+        <SeparateurFiltres />
 
         {CONTEXTES.map((c) => (
-          <Link
+          <Pilule
             key={c}
             href={lien({ contexte: parametres.contexte === c ? undefined : c })}
-            className={
-              parametres.contexte === c ? 'text-texte underline' : 'text-secondaire'
-            }
+            actif={parametres.contexte === c}
           >
             {LIBELLE_CONTEXTE[c]}
-          </Link>
+          </Pilule>
         ))}
 
         {parametres.projet ? (
-          <Link href={lien({ projet: undefined })} className="text-texte underline">
+          <Pilule href={lien({ projet: undefined })} actif>
             {projets.find((p) => p.id === parametres.projet)?.nom ?? 'Projet'} ×
-          </Link>
+          </Pilule>
         ) : null}
-      </div>
+      </BarreFiltres>
 
       <Widget
         libelle={`${taches.length} tâche${taches.length > 1 ? 's' : ''}`}
         action={
-          <Link href="/taches/importer" className="libelle">
+          <Link href="/taches/importer" className="action">
             Importer
           </Link>
         }

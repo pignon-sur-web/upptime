@@ -11,9 +11,11 @@ import { aujourdhui, jourLong } from '@/lib/date'
 export function EnTeteJour() {
   const jour = aujourdhui()
   return (
-    <header className="border-b border-trait px-5 pt-8 pb-6">
+    <header className="px-1 pt-8 pb-1">
       <p className="chiffres text-13 text-secondaire">{jour}</p>
-      <h1 className="mt-1 text-24 first-letter:uppercase">{jourLong(jour)}</h1>
+      <h1 className="mt-1 text-24 font-semibold first-letter:uppercase">
+        {jourLong(jour)}
+      </h1>
     </header>
   )
 }
@@ -33,7 +35,7 @@ export function EnTeteSection({
   action?: ReactNode
 }) {
   return (
-    <header className="flex items-center gap-2 border-b border-trait px-5 pt-6 pb-4">
+    <header className="flex items-center gap-2 px-1 pt-6 pb-1">
       {retour ? (
         <Link
           href={retour}
@@ -43,7 +45,7 @@ export function EnTeteSection({
           ‹
         </Link>
       ) : null}
-      <h1 className="min-w-0 flex-1 text-18">{titre}</h1>
+      <h1 className="min-w-0 flex-1 text-24 font-semibold">{titre}</h1>
       {action}
     </header>
   )

@@ -38,7 +38,7 @@ export function ListeTransactions({
             key={tx.id}
             className={[
               'flex items-baseline gap-3 border-b border-trait py-2 last:border-b-0',
-              ajustement ? 'border-l-2 border-l-texte pl-3' : '',
+              ajustement ? 'border-l-2 border-l-neutre pl-3' : '',
             ].join(' ')}
           >
             <span className="chiffres w-12 shrink-0 text-11 text-secondaire">

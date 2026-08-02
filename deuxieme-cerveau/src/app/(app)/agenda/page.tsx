@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import type { Route } from 'next'
 import { EnTeteSection } from '@/components/nav/EnTete'
+import { Carte } from '@/components/ui/Carte'
+import { Onglets } from '@/components/ui/Pilule'
 import { Widget } from '@/components/ui/Widget'
 import { BoutonPrincipal, Champ, Menu, Saisie } from '@/components/ui/Champ'
 import { agendaEntre, type JourDAgenda } from '@/lib/donnees/agenda'
@@ -35,31 +37,19 @@ export default async function PageAgenda({
     <>
       <EnTeteSection titre="Agenda" />
 
-      <nav className="flex border-b border-trait" aria-label="Vue">
-        {(
+      <Onglets
+        libelle="Vue"
+        onglets={(
           [
             { cle: 'semaine', libelle: 'Semaine' },
             { cle: 'mois', libelle: 'Mois' },
           ] as const
-        ).map((v) => {
-          const actif = v.cle === vue
-          return (
-            <Link
-              key={v.cle}
-              href={`/agenda?vue=${v.cle}&jour=${ancre}` as Route}
-              aria-current={actif ? 'page' : undefined}
-              className={[
-                'cible flex flex-1 items-center justify-center border-t-2 text-13',
-                actif
-                  ? 'border-t-texte font-medium'
-                  : 'border-t-transparent text-secondaire',
-              ].join(' ')}
-            >
-              {v.libelle}
-            </Link>
-          )
-        })}
-      </nav>
+        ).map((v) => ({
+          href: `/agenda?vue=${v.cle}&jour=${ancre}` as Route,
+          libelle: v.libelle,
+          actif: v.cle === vue,
+        }))}
+      />
 
       {vue === 'semaine' ? <VueSemaine ancre={ancre} /> : <VueMois ancre={ancre} />}
       <FormulaireEvenement ancre={ancre} />
@@ -80,7 +70,7 @@ function Barre({
   vue: 'semaine' | 'mois'
 }) {
   return (
-    <div className="flex items-center justify-between gap-2 border-b border-trait px-2 py-2">
+    <Carte className="flex items-center justify-between gap-2 px-2 py-1" sansMarge>
       <Link
         href={`/agenda?vue=${vue}&jour=${precedent}` as Route}
         aria-label="Période précédente"
@@ -102,7 +92,7 @@ function Barre({
       >
         ›
       </Link>
-    </div>
+    </Carte>
   )
 }
 
@@ -139,12 +129,7 @@ function JourneeDetaillee({ journee }: { journee: JourDAgenda }) {
   const cestAujourdhui = journee.jour === aujourdhui()
 
   return (
-    <section
-      className={[
-        'border-b border-trait px-5 py-3',
-        cestAujourdhui ? 'border-l-2 border-l-texte' : '',
-      ].join(' ')}
-    >
+    <Carte className={cestAujourdhui ? 'border-l-2 border-l-accent' : ''}>
       <h2
         className={[
           'text-11 uppercase tracking-[0.08em]',
@@ -205,7 +190,7 @@ function JourneeDetaillee({ journee }: { journee: JourDAgenda }) {
           ))}
         </ul>
       )}
-    </section>
+    </Carte>
   )
 }
 
@@ -236,7 +221,7 @@ async function VueMois({ ancre }: { ancre: string }) {
         vue="mois"
       />
 
-      <div className="px-5 py-4">
+      <Carte>
         <div className="grid grid-cols-7 gap-px">
           {['lun', 'mar', 'mer', 'jeu', 'ven', 'sam', 'dim'].map((nom) => (
             <div key={nom} className="pb-1 text-center text-11 text-secondaire">
@@ -259,8 +244,12 @@ async function VueMois({ ancre }: { ancre: string }) {
                 key={jour}
                 href={`/agenda?vue=semaine&jour=${jour}` as Route}
                 className={[
-                  'flex aspect-square flex-col items-center justify-center border border-trait text-13',
-                  cestAujourdhui ? 'bg-texte text-fond' : '',
+                  'transition-etat flex aspect-square flex-col items-center justify-center rounded-petit text-13',
+                  cestAujourdhui
+                    ? 'bg-accent font-medium text-carte'
+                    : compte > 0
+                      ? 'bg-accent-fond text-texte'
+                      : 'text-secondaire',
                 ].join(' ')}
               >
                 <span className="chiffres">{Number(jour.slice(8, 10))}</span>
@@ -268,7 +257,7 @@ async function VueMois({ ancre }: { ancre: string }) {
                   <span
                     className={[
                       'chiffres text-11',
-                      cestAujourdhui ? 'text-fond/80' : 'text-secondaire',
+                      cestAujourdhui ? 'text-carte/80' : 'text-accent',
                     ].join(' ')}
                   >
                     {compte}
@@ -278,7 +267,7 @@ async function VueMois({ ancre }: { ancre: string }) {
             )
           })}
         </div>
-      </div>
+      </Carte>
     </>
   )
 }

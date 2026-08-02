@@ -29,11 +29,12 @@ export async function TachesDuJourWidget() {
   return (
     <Widget
       libelle="Tâches du jour"
+      emoji="✅"
       action={
         taches.length > 0 ? (
           <span className="chiffres text-13">{taches.length}</span>
         ) : (
-          <Link href="/taches/nouvelle" className="libelle">
+          <Link href="/taches/nouvelle" className="action">
             Ajouter
           </Link>
         )
@@ -73,6 +74,7 @@ export async function RetardsWidget() {
   return (
     <Widget
       libelle="En retard"
+      emoji="⏰"
       action={<span className="chiffres text-13">{taches.length}</span>}
     >
       <ListeTaches taches={taches.slice(0, 5)} />
@@ -106,8 +108,9 @@ export async function SeptJoursWidget() {
   return (
     <Widget
       libelle="Sept prochains jours"
+      emoji="🗓️"
       action={
-        <Link href="/taches?vue=semaine" className="libelle">
+        <Link href="/taches?vue=semaine" className="action">
           Détail
         </Link>
       }
@@ -141,8 +144,9 @@ export async function ProjetsEnCoursWidget() {
   return (
     <Widget
       libelle="Projets en cours"
+      emoji="📁"
       action={
-        <Link href="/projets" className="libelle">
+        <Link href="/projets" className="action">
           Tout voir
         </Link>
       }

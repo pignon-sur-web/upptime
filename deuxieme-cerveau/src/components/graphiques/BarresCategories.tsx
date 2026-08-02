@@ -46,7 +46,7 @@ export function BarresCategories({
             key={categorie.categorie}
             className={[
               'border-b border-trait py-2 last:border-b-0',
-              depasse ? 'bg-texte px-2 text-fond' : '',
+              depasse ? 'rounded-petit bg-echec-fond px-2 text-echec' : '',
             ].join(' ')}
           >
             <div className="flex items-baseline justify-between gap-4">
@@ -98,7 +98,7 @@ export function BarresCategories({
             <div
               className={[
                 'mt-1 flex flex-wrap gap-x-3 text-11',
-                depasse ? 'text-fond/80' : 'text-secondaire',
+                depasse ? 'text-echec/80' : 'text-secondaire',
               ].join(' ')}
             >
               <span className="chiffres">

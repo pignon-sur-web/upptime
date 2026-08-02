@@ -3,9 +3,14 @@ import type { ReactNode } from 'react'
 /**
  * Les champs de formulaire de l'application.
  *
- * Un seul filet sous le champ, jamais de boîte fermée : c'est la même grammaire
- * que les listes et les widgets, et ça évite d'inventer un deuxième langage
- * visuel pour la saisie.
+ * Une boîte fermée aux coins arrondis, comme les cartes : un champ est un
+ * endroit où l'on met quelque chose, et le contour dit où commence et où
+ * finit cet endroit. Le filet simple d'avant se confondait avec les
+ * séparateurs de liste.
+ *
+ * La mise au point colore le contour en bleu d'accent plutôt que d'ajouter un
+ * halo : c'est la même couleur que la case cochée et que l'onglet actif, donc
+ * « là où je suis » s'écrit toujours pareil.
  *
  * La taille du texte des champs est imposée à 16px par `globals.css`, pas ici :
  * sous ce seuil, Safari iOS zoome le viewport à la mise au point et n'en
@@ -13,7 +18,7 @@ import type { ReactNode } from 'react'
  */
 
 const CLASSE_SAISIE =
-  'w-full border-b border-trait bg-transparent py-2 text-texte outline-none placeholder:text-secondaire focus:border-texte'
+  'w-full rounded-petit border border-trait bg-carte px-3 py-2 text-texte outline-none placeholder:text-secondaire focus:border-accent'
 
 export function Champ({
   libelle,
@@ -26,7 +31,9 @@ export function Champ({
 }) {
   return (
     <label className="block py-2">
-      <span className="libelle block">{libelle}</span>
+      <span className="mb-1 block text-13 font-medium text-secondaire">
+        {libelle}
+      </span>
       {children}
       {aide ? <span className="mt-1 block text-11 text-secondaire">{aide}</span> : null}
     </label>
@@ -64,9 +71,11 @@ export function Menu(proprietes: React.ComponentPropsWithRef<'select'>) {
 }
 
 /**
- * Le bouton d'envoi. Inversé — fond Encre, texte Papier — parce que c'est
- * l'action principale de l'écran et que l'inversion est le seul surlignage
- * dont dispose un système monochrome.
+ * Le bouton d'envoi : plein, bleu d'accent, aux coins arrondis.
+ *
+ * C'est l'action principale de l'écran, et il n'y en a qu'une par écran. Un
+ * second bouton plein en dessous ferait hésiter au lieu de guider — les
+ * actions secondaires restent des libellés soulignés (`BoutonDiscret`).
  */
 export function BoutonPrincipal({
   children,
@@ -75,7 +84,7 @@ export function BoutonPrincipal({
   return (
     <button
       {...reste}
-      className="cible w-full bg-texte px-4 text-15 font-medium text-fond disabled:opacity-40"
+      className="cible w-full rounded-petit bg-accent px-4 text-15 font-medium text-carte disabled:opacity-40"
     >
       {children}
     </button>

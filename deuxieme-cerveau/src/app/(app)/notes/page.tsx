@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import type { Route } from 'next'
 import { EnTeteSection } from '@/components/nav/EnTete'
+import { Carte } from '@/components/ui/Carte'
+import { BarreFiltres, Pilule } from '@/components/ui/Pilule'
 import { Invitation, Widget } from '@/components/ui/Widget'
 import { BoutonPrincipal, Champ, Saisie, Zone } from '@/components/ui/Champ'
 import { chercherNotes, tagsDeNotes } from '@/lib/donnees/vie'
@@ -27,42 +29,47 @@ export default async function PageNotes({
         favori. La requête part en `websearch_to_tsquery` sur la configuration
         française sans accents — chercher « resume » trouve « résumé ».
       */}
-      <form method="get" className="flex items-center gap-2 border-b border-trait px-5 py-3">
-        <Saisie
-          type="search"
-          name="q"
-          defaultValue={q ?? ''}
-          placeholder="Chercher — resume trouve résumé"
-          aria-label="Chercher dans les notes"
-        />
-        {tag ? <input type="hidden" name="tag" value={tag} /> : null}
-        <button type="submit" className="cible shrink-0 px-2 text-13 underline">
-          Chercher
-        </button>
-      </form>
+      <Carte>
+        <form method="get" className="flex items-center gap-2">
+          <Saisie
+            type="search"
+            name="q"
+            defaultValue={q ?? ''}
+            placeholder="Chercher — resume trouve résumé"
+            aria-label="Chercher dans les notes"
+          />
+          {tag ? <input type="hidden" name="tag" value={tag} /> : null}
+          <button type="submit" className="cible shrink-0 px-2 text-13 underline">
+            Chercher
+          </button>
+        </form>
+      </Carte>
 
       {tags.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-trait px-5 py-2 text-13">
+        <BarreFiltres libelle="Étiquettes">
           {tag ? (
-            <Link href={q ? (`/notes?q=${encodeURIComponent(q)}` as Route) : '/notes'} className="text-texte underline">
+            <Pilule
+              href={q ? (`/notes?q=${encodeURIComponent(q)}` as Route) : '/notes'}
+              actif
+            >
               {tag} ×
-            </Link>
+            </Pilule>
           ) : (
             tags.slice(0, 12).map(({ tag: nom, nb }) => (
-              <Link
+              <Pilule
                 key={nom}
                 href={
                   (q
                     ? `/notes?q=${encodeURIComponent(q)}&tag=${encodeURIComponent(nom)}`
                     : `/notes?tag=${encodeURIComponent(nom)}`) as Route
                 }
-                className="text-secondaire"
+                actif={false}
               >
                 {nom} <span className="chiffres text-11">{nb}</span>
-              </Link>
+              </Pilule>
             ))
           )}
-        </div>
+        </BarreFiltres>
       ) : null}
 
       <Widget

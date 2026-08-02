@@ -51,7 +51,7 @@ export function FormulaireBudgets({
                   key={budget.id}
                   className={[
                     'flex items-center gap-3 border-b border-trait py-2 last:border-b-0',
-                    depasse ? 'bg-texte px-2 text-fond' : '',
+                    depasse ? 'rounded-petit bg-echec-fond px-2 text-echec' : '',
                   ].join(' ')}
                 >
                   <span className="min-w-0 flex-1">
@@ -59,7 +59,7 @@ export function FormulaireBudgets({
                     <span
                       className={[
                         'block text-11',
-                        depasse ? 'text-fond/80' : 'text-secondaire',
+                        depasse ? 'text-echec/80' : 'text-secondaire',
                       ].join(' ')}
                     >
                       {budget.mois === null
@@ -78,7 +78,7 @@ export function FormulaireBudgets({
                       aria-label={`Supprimer le budget ${budget.categorie}`}
                       className={[
                         'shrink-0 px-1 text-13',
-                        depasse ? 'text-fond' : 'text-secondaire',
+                        depasse ? 'text-echec' : 'text-secondaire',
                       ].join(' ')}
                     >
                       ×

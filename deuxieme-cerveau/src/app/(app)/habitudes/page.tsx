@@ -57,7 +57,7 @@ export default async function PageHabitudes({
       <EnTeteSection
         titre="Habitudes"
         action={
-          <Link href="/habitudes/reglages" className="libelle">
+          <Link href="/habitudes/reglages" className="action">
             Réglages
           </Link>
         }
@@ -76,7 +76,7 @@ export default async function PageHabitudes({
               aria-current={actif ? 'date' : undefined}
               className={[
                 'cible flex flex-1 flex-col items-center justify-center gap-0.5 border-t-2 py-2',
-                actif ? 'border-t-texte' : 'border-t-transparent',
+                actif ? 'border-t-accent' : 'border-t-transparent',
               ].join(' ')}
             >
               <span className={actif ? 'text-11' : 'text-11 text-secondaire'}>

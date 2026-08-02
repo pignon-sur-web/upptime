@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { EnTeteSection } from '@/components/nav/EnTete'
+import { Carte } from '@/components/ui/Carte'
+import { Badge, BadgePriorite } from '@/components/ui/Badge'
 import { Invitation, Widget } from '@/components/ui/Widget'
 import { FormulaireTache } from '@/components/taches/FormulaireTache'
 import { ListeTaches } from '@/components/taches/ListeTaches'
@@ -20,11 +22,7 @@ import { LIBELLE_STATUT_TACHE, libelleRecurrence } from '@/lib/enums'
 
 export const metadata = { title: 'Tâche' }
 
-export default async function PageTache({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default async function PageTache({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const [tache, projets] = await Promise.all([detailTache(id), optionsProjets()])
 
@@ -43,65 +41,70 @@ export default async function PageTache({
     <>
       <EnTeteSection titre={tache.titre} retour="/taches" />
 
-      {/* L'état, en une ligne : c'est ce qu'on vient vérifier en ouvrant
-          l'écran, avant même de vouloir modifier quoi que ce soit. */}
-      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-trait px-5 py-3 text-13 text-secondaire">
-        <span className={faite || annulee ? undefined : 'text-texte'}>
-          {LIBELLE_STATUT_TACHE[tache.statut]}
-        </span>
-        {tache.echeance ? (
-          <span className="chiffres">{jourRelatif(tache.echeance)}</span>
-        ) : (
-          <span>sans échéance</span>
-        )}
-        {tache.recurrence ? <span>↻ {libelleRecurrence(tache.recurrence)}</span> : null}
-        {tache.projetNom ? <span>{tache.projetNom}</span> : null}
-      </div>
+      {/* L'état puis les gestes, dans une seule carte : c'est ce qu'on vient
+          vérifier et faire en ouvrant l'écran. On l'ouvre dix fois pour
+          cocher, une fois pour modifier — le formulaire vient après. */}
+      <Carte>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-13 text-secondaire">
+          <BadgePriorite priorite={tache.priorite} />
+          <Badge ton={faite ? 'reussite' : annulee ? 'neutre' : 'accent'}>
+            {LIBELLE_STATUT_TACHE[tache.statut]}
+          </Badge>
+          {tache.echeance ? (
+            <span className="chiffres">{jourRelatif(tache.echeance)}</span>
+          ) : (
+            <span>sans échéance</span>
+          )}
+          {tache.recurrence ? <span>↻ {libelleRecurrence(tache.recurrence)}</span> : null}
+          {tache.projetNom ? <Badge pastille={false}>{tache.projetNom}</Badge> : null}
+        </div>
 
-      {/* Les gestes, avant le formulaire : on ouvre cet écran dix fois pour
-          cocher, une fois pour modifier. */}
-      <div className="flex flex-wrap items-center gap-3 border-b border-trait px-5 py-3">
-        {faite ? (
-          <form action={rouvrir}>
-            <button type="submit" className="cible text-13 underline">
-              Rouvrir
-            </button>
-          </form>
-        ) : (
-          <form action={completer}>
-            <button type="submit" className="cible text-13 underline">
-              Marquer comme faite
-            </button>
-          </form>
-        )}
-
-        {tache.recurrence && !faite && !annulee ? (
-          <form action={passer}>
-            {/* Sans ce geste, « sauté » serait indiscernable de « en retard »
-                et la liste se remplirait de reproches. */}
-            <button type="submit" className="cible text-13 text-secondaire underline">
-              Passer cette occurrence
-            </button>
-          </form>
+        {tache.parent ? (
+          <p className="mt-2 text-13">
+            <Link
+              href={`/taches/${tache.parent.id}`}
+              className="text-secondaire underline"
+            >
+              ↑ {tache.parent.titre}
+            </Link>
+          </p>
         ) : null}
 
-        <form action={supprimer} className="ml-auto">
-          <button type="submit" className="cible text-13 text-secondaire underline">
-            Supprimer
-            {tache.sousTaches.length > 0
-              ? ` (et ${tache.sousTaches.length} sous-tâche${tache.sousTaches.length > 1 ? 's' : ''})`
-              : ''}
-          </button>
-        </form>
-      </div>
+        <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-trait pt-3">
+          {faite ? (
+            <form action={rouvrir}>
+              <button type="submit" className="cible text-13 underline">
+                Rouvrir
+              </button>
+            </form>
+          ) : (
+            <form action={completer}>
+              <button type="submit" className="cible text-13 underline">
+                Marquer comme faite
+              </button>
+            </form>
+          )}
 
-      {tache.parent ? (
-        <div className="border-b border-trait px-5 py-3 text-13">
-          <Link href={`/taches/${tache.parent.id}`} className="text-secondaire underline">
-            ↑ {tache.parent.titre}
-          </Link>
+          {tache.recurrence && !faite && !annulee ? (
+            <form action={passer}>
+              {/* Sans ce geste, « sauté » serait indiscernable de « en retard »
+                et la liste se remplirait de reproches. */}
+              <button type="submit" className="cible text-13 text-secondaire underline">
+                Passer cette occurrence
+              </button>
+            </form>
+          ) : null}
+
+          <form action={supprimer} className="ml-auto">
+            <button type="submit" className="cible text-13 text-secondaire underline">
+              Supprimer
+              {tache.sousTaches.length > 0
+                ? ` (et ${tache.sousTaches.length} sous-tâche${tache.sousTaches.length > 1 ? 's' : ''})`
+                : ''}
+            </button>
+          </form>
         </div>
-      ) : null}
+      </Carte>
 
       <Widget
         libelle={`Sous-tâches${tache.sousTaches.length > 0 ? ` — ${tache.sousTaches.filter((s) => s.statut === 'fait').length}/${tache.sousTaches.length}` : ''}`}

@@ -28,7 +28,7 @@ export async function LeJour() {
   const parfait = pourcentage === 100
 
   return (
-    <Widget libelle="Le jour">
+    <Widget libelle="Le jour" emoji="☀️">
       <div className="flex items-end justify-between gap-4">
         {/* Le grand chiffre passe au vert à 100 %, et à 100 % seulement : une
             teinte qui apparaît en cours de route ne récompense plus rien. */}

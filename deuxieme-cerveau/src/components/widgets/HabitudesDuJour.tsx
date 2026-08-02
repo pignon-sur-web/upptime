@@ -17,7 +17,7 @@ export async function HabitudesDuJour() {
   const habitudes = await habitudesDuJour(jour)
 
   return (
-    <Widget libelle="Habitudes du jour">
+    <Widget libelle="Habitudes du jour" emoji="🔁">
       {habitudes.length === 0 ? (
         <Invitation>
           <Link href="/habitudes/reglages" className="underline">

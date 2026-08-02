@@ -56,7 +56,7 @@ export function ListeEcheances({
                   key={echeance.id}
                   className={[
                     'flex items-center gap-3 border-b border-trait py-2 last:border-b-0',
-                    enRetard ? 'border-l-2 border-l-texte pl-3' : '',
+                    enRetard ? 'border-l-2 border-l-echec pl-3' : '',
                   ].join(' ')}
                 >
                   <span className="min-w-0 flex-1">

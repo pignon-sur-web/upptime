@@ -34,7 +34,7 @@ export default async function PageExport() {
         <a
           href="/reglages/export/donnees"
           download
-          className="cible mt-4 flex w-full items-center justify-center bg-texte px-4 text-15 font-medium text-fond"
+          className="cible mt-4 flex w-full items-center justify-center rounded-petit bg-accent px-4 text-15 font-medium text-carte"
         >
           Télécharger l&apos;export
         </a>

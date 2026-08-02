@@ -11,7 +11,8 @@
  * — Un anneau sans rien à mesurer n'est pas dessiné. Un cercle vide en
  *   permanence n'est pas un objectif, c'est un reproche permanent.
  * — Le vert n'apparaît qu'à la fermeture complète. En cours de route l'anneau
- *   reste en Encre : féliciter à 40 % dévalue le vert de 100 %.
+ *   est bleu, la couleur des gestes qu'on fait : féliciter à 40 % dévaluerait
+ *   le vert de 100 %.
  * — Rien n'est rouge ici. La journée n'est pas finie ; l'échec se constate le
  *   lendemain, sur le mur du mois, pas sur un anneau qu'on est en train de
  *   remplir.
@@ -69,7 +70,7 @@ export function Anneaux({ anneaux }: { anneaux: readonly Anneau[] }) {
                   cy={centre}
                   r={rayon}
                   fill="none"
-                  stroke={complet ? 'var(--reussite)' : 'var(--texte)'}
+                  stroke={complet ? 'var(--reussite)' : 'var(--accent)'}
                   strokeWidth={EPAISSEUR}
                   strokeLinecap="round"
                   strokeDasharray={`${circonference * part} ${circonference}`}

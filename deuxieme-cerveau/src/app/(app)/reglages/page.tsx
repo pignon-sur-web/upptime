@@ -57,10 +57,10 @@ export default async function PageReglages() {
                     aria-label={`${actif ? 'Désactiver' : 'Activer'} : ${widget.libelle}`}
                     className="flex size-11 shrink-0 items-center justify-center"
                   >
-                    <span className="flex size-6 items-center justify-center border border-texte">
+                    <span className="flex size-5 items-center justify-center rounded-petit border border-secondaire">
                       <span
                         aria-hidden
-                        className="transition-etat size-4 origin-center bg-texte"
+                        className="transition-etat size-3 origin-center rounded-petit bg-accent"
                         style={{ transform: actif ? 'scale(1)' : 'scale(0)' }}
                       />
                     </span>
@@ -155,7 +155,7 @@ async function AbonnementCalendrier() {
 
       <a
         href={`webcal://${chemin}`}
-        className="cible mt-4 flex w-full items-center justify-center bg-texte px-4 text-15 font-medium text-fond"
+        className="cible mt-4 flex w-full items-center justify-center rounded-petit bg-accent px-4 text-15 font-medium text-carte"
       >
         S&apos;abonner sur cet appareil
       </a>

@@ -113,11 +113,21 @@ et des dates — jamais un montant, une note ou un solde. Régénérer
 `AUTH_SECRET` coupe l'abonnement en même temps que les sessions.
 
 **La direction artistique est imposée par l'outillage.** Les espaces de noms
-Tailwind `--color-*`, `--radius-* `et `--shadow-*` sont vidés : `rounded-lg`,
-`shadow-md` et `text-red-500` ne compilent plus. Les utilitaires statiques que
-ce vidage ne couvre pas (`rounded-full`, `shadow`, `ring`) sont neutralisés par
-une règle hors `@layer`, qui l'emporte dans la cascade. Seule échappatoire
-connue : un utilitaire forcé (`rounded-full!`).
+Tailwind `--color-*`, `--radius-*` et `--shadow-*` sont vidés puis redéclarés
+avec les seules valeurs du système : `text-red-500`, `rounded-xl` et
+`shadow-2xl` ne compilent pas, `text-urgent`, `rounded-carte` et `shadow-carte`
+oui. L'échelle tient en **trois rayons et une ombre**, parce que c'est comme ça
+qu'une échelle meurt — un rayon à la fois. `verifier:da` recompte les jetons et
+relit les composants à chaque exécution, valeurs arbitraires (`rounded-[2px]`)
+comprises.
+
+**Les couleurs disent trois choses, et rien d'autre.** Le **bleu** marque une
+action que j'ai faite ou l'endroit où je suis : case cochée, onglet actif,
+bouton principal, anneau en cours. Le **vert et le rouge** portent un verdict
+sur une période close : jour plein, série tenue, échéance dépassée, solde
+négatif. Les **tons d'étiquette** — rouge, ambre, gris — ne sont que des
+priorités Eisenhower, en fond pâle avec pastille, jamais en aplat. Une couleur
+qui ne rentre dans aucune de ces trois cases n'a pas lieu d'être.
 
 ---
 
@@ -130,7 +140,7 @@ npm run verifier:csv          # analyseur CSV sur ses cas limites
 npm run verifier:fuseau       # le fuseau, aux heures où il casse
 npm run verifier:ics          # le flux iCalendar, sur ce qui casse un abonnement
 npm run verifier:parcours     # la porte d'entrée, au navigateur (serveur lancé)
-npm run verifier:da           # rayon et ombre réellement neutralisés
+npm run verifier:da           # échelles fermées, carte réellement rendue
 npm run verifier:application  # les six gestes qui comptent, contre une vraie base
 ```
 

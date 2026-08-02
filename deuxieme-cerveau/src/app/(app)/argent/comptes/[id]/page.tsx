@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { EnTeteSection } from '@/components/nav/EnTete'
+import { Carte } from '@/components/ui/Carte'
 import { Invitation, Widget } from '@/components/ui/Widget'
 import { ListeTransactions } from '@/components/finances/ListeTransactions'
 import { detailCompte, transactions } from '@/lib/donnees/finances'
@@ -29,7 +30,7 @@ export default async function PageCompte({
     <>
       <EnTeteSection titre={compte.nom} retour="/argent" />
 
-      <div className="border-b border-trait px-5 py-4">
+      <Carte>
         <p className="chiffres text-40 leading-none">{euros(compte.soldePointeCents)}</p>
 
         {/* Le solde pointé s'arrête à aujourd'hui, le solde total inclut les
@@ -62,7 +63,7 @@ export default async function PageCompte({
             Virement
           </Link>
         </div>
-      </div>
+      </Carte>
 
       <Widget
         libelle="Grand livre"

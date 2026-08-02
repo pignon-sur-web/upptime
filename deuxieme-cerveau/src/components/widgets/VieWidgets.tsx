@@ -21,8 +21,9 @@ export async function ObjectifsEnCoursWidget() {
   return (
     <Widget
       libelle="Objectifs"
+      emoji="🎯"
       action={
-        <Link href="/objectifs" className="libelle">
+        <Link href="/objectifs" className="action">
           Tout voir
         </Link>
       }
@@ -68,8 +69,9 @@ export async function AgendaWidget() {
   return (
     <Widget
       libelle="Agenda"
+      emoji="📅"
       action={
-        <Link href="/agenda" className="libelle">
+        <Link href="/agenda" className="action">
           Semaine
         </Link>
       }
@@ -113,8 +115,9 @@ export async function LectureEnCoursWidget() {
   return (
     <Widget
       libelle="En lecture"
+      emoji="📖"
       action={
-        <Link href="/lectures" className="libelle">
+        <Link href="/lectures" className="action">
           Lectures
         </Link>
       }
@@ -158,6 +161,7 @@ export async function InboxWidget() {
   return (
     <Widget
       libelle="Inbox"
+      emoji="📥"
       action={<span className="chiffres text-13">{elements.length}</span>}
     >
       <ul>

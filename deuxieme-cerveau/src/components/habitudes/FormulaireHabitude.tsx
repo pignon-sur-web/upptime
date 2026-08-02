@@ -67,7 +67,7 @@ export function FormulaireHabitude({ habitude }: { habitude?: Habitude }) {
             return (
               <label
                 key={jour.valeur}
-                className="cible relative flex flex-1 items-center justify-center border border-trait has-checked:border-texte has-checked:bg-texte has-checked:text-fond"
+                className="cible relative flex flex-1 items-center justify-center rounded-petit border border-trait has-checked:border-accent has-checked:bg-accent has-checked:text-carte"
               >
                 <input
                   type="checkbox"
@@ -94,7 +94,7 @@ function BoutonEnvoyer({ modification }: { modification: boolean }) {
     <button
       type="submit"
       disabled={pending}
-      className="transition-etat mt-3 h-12 w-full border border-texte bg-texte text-15 text-fond disabled:opacity-40"
+      className="transition-etat mt-3 h-12 w-full rounded-petit bg-accent text-15 font-medium text-carte disabled:opacity-40"
     >
       {pending ? 'Enregistrement…' : modification ? 'Enregistrer' : 'Ajouter'}
     </button>

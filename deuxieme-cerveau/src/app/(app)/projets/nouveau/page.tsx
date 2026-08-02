@@ -1,4 +1,5 @@
 import { EnTeteSection } from '@/components/nav/EnTete'
+import { Carte } from '@/components/ui/Carte'
 import { FormulaireProjet } from '@/components/projets/FormulaireProjet'
 import { creerProjetEtRevenir } from '@/lib/actions/projets'
 
@@ -8,9 +9,9 @@ export default function PageNouveauProjet() {
   return (
     <>
       <EnTeteSection titre="Nouveau projet" retour="/projets" />
-      <div className="px-5 py-4">
+      <Carte>
         <FormulaireProjet action={creerProjetEtRevenir} libelleEnvoi="Créer le projet" />
-      </div>
+      </Carte>
     </>
   )
 }

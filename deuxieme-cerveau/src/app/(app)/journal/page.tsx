@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Route } from 'next'
 import { EnTeteSection } from '@/components/nav/EnTete'
+import { Carte } from '@/components/ui/Carte'
 import { Invitation, Widget } from '@/components/ui/Widget'
 import { BoutonPrincipal, Champ, Menu, Zone } from '@/components/ui/Champ'
 import {
@@ -62,7 +63,7 @@ export default async function PageJournal({
     <>
       <EnTeteSection titre="Journal" />
 
-      <div className="flex items-center justify-between gap-2 border-b border-trait px-2 py-2">
+      <Carte className="flex items-center justify-between gap-2 px-2 py-1" sansMarge>
         <Link
           href={`/journal?jour=${decaler(jour, -1)}` as Route}
           aria-label="Jour précédent"
@@ -84,7 +85,7 @@ export default async function PageJournal({
             ›
           </Link>
         )}
-      </div>
+      </Carte>
 
       <Widget
         libelle={dejaEcrit ? "L'entrée du jour" : 'Écrire'}
