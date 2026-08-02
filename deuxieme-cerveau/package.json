@@ -14,6 +14,8 @@
     "verifier:parcours": "node scripts/verifier-parcours.mjs",
     "verifier:da": "node scripts/verifier-da.mjs",
     "verifier:csv": "node scripts/verifier-csv.mjs",
+    "verifier:fuseau": "node scripts/verifier-fuseau.mjs",
+    "verifier:application": "node scripts/verifier-application.mjs",
     "verifier:sql": "bash scripts/verifier-sql.sh",
     "types": "node scripts/generer-types.mjs",
     "migrer": "node scripts/appliquer-migrations.mjs"
