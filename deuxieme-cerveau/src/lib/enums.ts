@@ -63,6 +63,31 @@ export function rangPriorite(priorite: number | null): number {
   return priorite
 }
 
+/**
+ * Les catégories d'événement. L'ensemble est FERMÉ, contraint en base par
+ * `check (category in ('pro','perso','sport'))`.
+ *
+ * C'est précisément parce qu'il est fermé qu'on peut lui attacher une couleur :
+ * deux séances de sport auront toujours le même badge. Une catégorie en texte
+ * libre — comme celles des objectifs ou des livres — ne le permettrait pas, et
+ * la table de correspondance dériverait dès la première valeur inventée.
+ */
+export const CATEGORIES_EVENEMENT = ['pro', 'perso', 'sport'] as const
+export type CategorieEvenement = (typeof CATEGORIES_EVENEMENT)[number]
+
+export const LIBELLE_CATEGORIE_EVENEMENT: Record<CategorieEvenement, string> = {
+  pro: 'Pro',
+  perso: 'Perso',
+  sport: 'Sport',
+}
+
+/** Le ton du badge. Les noms sont ceux de `Badge`, pas des couleurs. */
+export const TON_CATEGORIE_EVENEMENT: Record<CategorieEvenement, string> = {
+  pro: 'accent',
+  perso: 'neutre',
+  sport: 'reussite',
+}
+
 export const CONTEXTES = ['pro', 'perso'] as const
 export type Contexte = (typeof CONTEXTES)[number]
 

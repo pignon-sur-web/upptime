@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { Invitation, Widget } from '@/components/ui/Widget'
 import { Jauge } from '@/components/ui/Jauge'
 import { ListeTaches } from '@/components/taches/ListeTaches'
+import { TableTaches } from '@/components/taches/TableTaches'
+import { BadgePriorite } from '@/components/ui/Badge'
 import {
   tachesDuJour,
   tachesEnRetard,
@@ -9,7 +11,7 @@ import {
   tachesSeptJours,
 } from '@/lib/donnees/taches'
 import { listerProjets } from '@/lib/donnees/projets'
-import { jourRelatif, jourSemaineCourt } from '@/lib/date'
+import { jourCourt, jourSemaineCourt } from '@/lib/date'
 
 /**
  * Les quatre widgets « travail » du tableau de bord.
@@ -44,7 +46,7 @@ export async function TachesDuJourWidget() {
         )
       }
     >
-      <ListeTaches
+      <TableTaches
         taches={taches.slice(0, 7)}
         vide={
           <Invitation>
@@ -68,7 +70,7 @@ export async function TachesDuJourWidget() {
       {sansDate.length > 0 ? (
         <div className="mt-4 border-t border-trait pt-3">
           <p className="libelle mb-1">Sans date</p>
-          <ListeTaches taches={sansDate.slice(0, 5)} reportable={false} />
+          <TableTaches taches={sansDate.slice(0, 5)} />
           {sansDate.length > 5 ? (
             <Link
               href="/taches"
@@ -183,9 +185,31 @@ export async function ProjetsEnCoursWidget() {
                   {projet.avancement === null
                     ? '—'
                     : `${Math.round(projet.avancement * 100)} %`}
-                  {projet.echeance ? ` · ${jourRelatif(projet.echeance)}` : ''}
                 </span>
               </div>
+
+              {/* L'étiquette de priorité et la plage de dates, comme la
+                  maquette. La priorité 0 ne rend rien : « aucune priorité »
+                  est le cas par défaut, pas une information. */}
+              <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-11 text-secondaire">
+                <BadgePriorite priorite={projet.priorite} />
+                {projet.echeance ? (
+                  <span className="chiffres">
+                    {projet.debut ? `${jourCourt(projet.debut)} → ` : ''}
+                    {jourCourt(projet.echeance)}
+                  </span>
+                ) : null}
+                {projet.joursRestants !== null ? (
+                  <span
+                    className={projet.joursRestants < 0 ? 'font-medium text-echec' : ''}
+                  >
+                    {projet.joursRestants < 0
+                      ? `${-projet.joursRestants} j de retard`
+                      : `${projet.joursRestants} j restants`}
+                  </span>
+                ) : null}
+              </div>
+
               <div className="mt-1.5">
                 <Jauge valeur={projet.avancement} />
               </div>

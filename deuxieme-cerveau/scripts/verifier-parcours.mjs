@@ -120,6 +120,46 @@ let cookieValide = null
   const debordement = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)
   verifier('aucun débordement horizontal', !debordement)
 
+  // La grille de lancement : une tuile par destination, et toutes cliquables.
+  const tuiles = await page.locator('nav[aria-label="Sections"] a').count()
+  verifier('la grille de lancement rend ses tuiles', tuiles === 14, `${tuiles}`)
+
+  /*
+   * La surcharge de thème, testée dans le sens qui compte : SYSTÈME EN CLAIR,
+   * choix forcé en sombre. Vérifier l'inverse ne prouverait rien — la media
+   * query suffirait. Ici seul `color-scheme: dark` posé par `data-theme` peut
+   * produire le fond sombre.
+   */
+  await page.evaluate(() => localStorage.setItem('theme', 'sombre'))
+  await page.reload({ waitUntil: 'networkidle' })
+  const force = await page.evaluate(() => ({
+    attribut: document.documentElement.dataset.theme,
+    fond: getComputedStyle(document.body).backgroundColor,
+  }))
+  verifier(
+    'le thème forcé bat la préférence système',
+    force.attribut === 'sombre' && force.fond === 'rgb(19, 19, 22)',
+    `${force.attribut} · ${force.fond}`,
+  )
+  await page.evaluate(() => localStorage.removeItem('theme'))
+  await page.reload({ waitUntil: 'networkidle' })
+
+  // Le tableau de bord sur grand écran : il doit s'élargir sans déborder.
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.reload({ waitUntil: 'networkidle' })
+  const large = await page.evaluate(() => ({
+    deborde: document.documentElement.scrollWidth > window.innerWidth,
+    largeurMain: document.querySelector('main')?.clientWidth ?? 0,
+  }))
+  verifier('aucun débordement horizontal à 1440 px', !large.deborde)
+  verifier(
+    'le tableau de bord dépasse la colonne étroite',
+    large.largeurMain > 672,
+    `${large.largeurMain} px`,
+  )
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.reload({ waitUntil: 'networkidle' })
+
   await page.screenshot({ path: 'captures/accueil-clair.png', fullPage: true })
   await page.goto(`${BASE}/connexion`, { waitUntil: 'networkidle' })
   await ctx.close()

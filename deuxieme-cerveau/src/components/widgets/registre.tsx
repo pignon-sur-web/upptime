@@ -72,8 +72,8 @@ export const WIDGETS: readonly DefinitionWidget[] = [
   { cle: 'objectifs_en_cours', libelle: 'Objectifs', Composant: ObjectifsEnCoursWidget },
   { cle: 'mur_du_mois', libelle: 'Le mur du mois', Composant: MurDuMoisWidget },
   { cle: 'courbe_habitudes', libelle: 'Courbe des habitudes', Composant: CourbeHabitudesWidget },
-  { cle: 'agenda', libelle: 'Agenda', Composant: AgendaWidget },
-  { cle: 'lecture_en_cours', libelle: 'En lecture', Composant: LectureEnCoursWidget },
+  { cle: 'agenda', libelle: 'Agenda de la semaine', Composant: AgendaWidget },
+  { cle: 'lecture_en_cours', libelle: 'Livres en cours', Composant: LectureEnCoursWidget },
   { cle: 'inbox', libelle: 'Inbox', Composant: InboxWidget },
 ]
 
