@@ -1,8 +1,12 @@
 import { chromium } from 'playwright'
+import { envLocal } from './env-local.mjs'
 
-const BASE = 'http://localhost:3000'
+const env = envLocal()
+const BASE = env.BASE_URL ?? 'http://localhost:3000'
 const CHROME = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'
-const MOT_DE_PASSE = 'verification-locale-uniquement'
+// Lu dans .env.local : le coder en dur fait échouer tous les contrôles sur la
+// connexion le jour où le mot de passe change, et on cherche ailleurs.
+const MOT_DE_PASSE = env.APP_PASSWORD
 
 const navigateur = await chromium.launch({ executablePath: CHROME })
 const resultats = []

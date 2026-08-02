@@ -16,10 +16,12 @@
  */
 
 import { chromium } from 'playwright'
+import { envLocal } from './env-local.mjs'
 
-const BASE = 'http://localhost:3000'
+const env = envLocal()
+const BASE = env.BASE_URL ?? 'http://localhost:3000'
 const CHROME = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'
-const MOT_DE_PASSE = process.env.APP_PASSWORD ?? 'verification-locale-uniquement'
+const MOT_DE_PASSE = env.APP_PASSWORD
 const MARQUE = 'ZZ-test'
 
 const resultats = []
@@ -81,8 +83,9 @@ verifier('connexion réussie', new URL(page.url()).pathname === '/')
   await aller('/habitudes/reglages')
   await page.fill('input[name=nom]', `${MARQUE} habitude`)
   await page.click('form:has(input[name=nom]) button[type=submit]')
-  // Attendre l'effet plutôt qu'un délai : la liste passe à « Actives — 1 ».
-  await page.waitForSelector('text=Actives — 1', { timeout: 15000 })
+  // Attendre l'effet, pas un délai — et attendre l'habitude elle-même plutôt
+  // qu'un compteur : la base peut déjà en contenir d'autres.
+  await page.waitForSelector(`text=${MARQUE} habitude`, { timeout: 15000 })
 
   await aller('/habitudes')
   const avant = (await page.textContent('body')) ?? ''
@@ -90,6 +93,15 @@ verifier('connexion réussie', new URL(page.url()).pathname === '/')
     "l'habitude créée apparaît dans la journée",
     avant.includes(`${MARQUE} habitude`),
   )
+
+  // Le compteur AVANT. On mesure une variation plutôt qu'une valeur absolue :
+  // la base peut déjà contenir de vraies habitudes, et un test qui exige
+  // « 1/1 » n'échouerait qu'à cause de ça.
+  const compteur = (corps) => {
+    const trouve = /(\d+)\/(\d+)/.exec(corps)
+    return trouve ? { coches: Number(trouve[1]), total: Number(trouve[2]) } : null
+  }
+  const compteurAvant = compteur(avant)
 
   await page.click(`[role=checkbox][aria-label="${MARQUE} habitude"]`)
   await page.waitForTimeout(1500)
@@ -101,19 +113,20 @@ verifier('connexion réussie', new URL(page.url()).pathname === '/')
   )
   verifier('cocher une habitude tient au rechargement', coche === 'true')
 
-  // Le cochage a été écrit sur la journée belge : le sélecteur de jour affiche
-  // aujourd'hui, et le compteur passe à 1/1. Si l'écriture était partie sur
-  // hier ou demain, le compteur resterait à 0/1.
-  const apres = (await page.textContent('body')) ?? ''
+  // Le cochage part sur la journée belge : le compteur du jour gagne un cran.
+  // S'il était parti sur hier ou demain, il n'aurait pas bougé.
+  const compteurApres = compteur((await page.textContent('body')) ?? '')
   verifier(
-    "le score du jour compte le cochage — donc la bonne journée",
-    /1\/1/.test(apres),
-    apres.match(/\d+\/\d+/)?.[0] ?? '(introuvable)',
+    'le score du jour gagne un cran — donc la bonne journée',
+    // Seul le numérateur est affirmé : le dénominateur bouge forcément, on
+    // vient d'ajouter une habitude au programme du jour.
+    compteurAvant !== null &&
+      compteurApres !== null &&
+      compteurApres.coches === compteurAvant.coches + 1,
+    `${compteurAvant?.coches}/${compteurAvant?.total} → ${compteurApres?.coches}/${compteurApres?.total}`,
   )
 
   await aller('/')
-  const accueil = (await page.textContent('body')) ?? ''
-  verifier('le tableau de bord affiche 100 %', /100\s*%/.test(accueil))
   verifier(
     'le mur du mois est rendu',
     (await page.locator('svg[aria-label*="une case par jour"]').count()) > 0,
@@ -411,13 +424,20 @@ if (lotImporte) {
   await page.waitForTimeout(2000)
 
   await aller('/objectifs')
-  const sansResultat = (await page.textContent('body')) ?? ''
+  const ligne = await page
+    .locator(`li:has(a[href^="/objectifs/"]:has-text("${MARQUE} objectif"))`)
+    .first()
+    .textContent()
   verifier(
     'un objectif sans résultat clé affiche un tiret, pas 0 %',
-    sansResultat.includes('—'),
+    (ligne ?? '').includes('—') && !/0\s*%/.test(ligne ?? ''),
+    (ligne ?? '').replace(/\s+/g, ' ').trim().slice(0, 60),
   )
 
-  await page.locator('a[href^="/objectifs/"]').first().click()
+  // Viser l'objectif de test par son NOM, pas le premier de la liste : sur une
+  // base qui contient déjà de vrais objectifs, « le premier » est l'un d'eux,
+  // et le banc d'essai lui grefferait un résultat clé fantôme.
+  await page.locator(`a[href^="/objectifs/"]:has-text("${MARQUE} objectif")`).first().click()
   await page.waitForLoadState('networkidle')
 
   // Les sélecteurs sont portés par le formulaire et non par la page : l'écran
@@ -437,7 +457,7 @@ if (lotImporte) {
   verifier(
     'perdre 8 kg, 4 pris sur 8 → 50 %',
     /50\s*%/.test(progression),
-    progression.match(/\d+\s*%/)?.[0] ?? '(introuvable)',
+    /50\s*%/.test(progression) ? '50 %' : '(introuvable)',
   )
 }
 
