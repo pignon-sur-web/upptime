@@ -24,7 +24,7 @@ import {
 
 /** Les écrans qui montrent des tâches. Une complétion les touche tous. */
 function rafraichir() {
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/taches')
   revalidatePath('/projets')
   revalidatePath('/agenda')

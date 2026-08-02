@@ -46,7 +46,7 @@ export async function enregistrerEntree(jour: Jour, donnees: FormData): Promise<
 
   if (error) throw error
 
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/journal')
 }
 

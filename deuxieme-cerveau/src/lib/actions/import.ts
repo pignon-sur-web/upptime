@@ -78,7 +78,7 @@ export async function importerTaches(entree: {
   const resultat = Array.isArray(data) ? data[0] : null
   if (!resultat?.batch_id) throw new Error("L'import n'a rien renvoyé.")
 
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/taches')
   revalidatePath('/projets')
 
@@ -101,7 +101,7 @@ export async function annulerImport(lotId: string): Promise<number> {
   const { data, error } = await supabase().rpc('annuler_import', { p_batch: lotId })
   if (error) throw error
 
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/taches')
   revalidatePath('/projets')
 

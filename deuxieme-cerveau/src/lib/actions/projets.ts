@@ -7,7 +7,7 @@ import { exigerSession } from '@/lib/session'
 import { STATUTS_PROJET, type StatutProjet } from '@/lib/enums'
 
 function rafraichir() {
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/projets')
   revalidatePath('/taches')
 }

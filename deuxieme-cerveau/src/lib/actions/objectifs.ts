@@ -14,7 +14,7 @@ import { exigerSession } from '@/lib/session'
  */
 
 function rafraichir(id?: string) {
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/objectifs')
   if (id) revalidatePath(`/objectifs/${id}`)
 }

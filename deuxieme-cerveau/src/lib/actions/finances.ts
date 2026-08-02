@@ -21,7 +21,7 @@ import { centsDepuisTexte, signerMontant } from '@/lib/argent'
  */
 
 function rafraichir() {
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/argent')
 }
 

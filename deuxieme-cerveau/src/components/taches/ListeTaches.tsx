@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useOptimistic, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Case } from '@/components/ui/Case'
 import { completerTache, reporterTache } from '@/lib/actions/taches'
 import { aujourdhui, jourRelatif } from '@/lib/date'
@@ -32,6 +33,7 @@ export function ListeTaches({
   /** Ce qui s'affiche quand il ne reste rien. */
   vide?: React.ReactNode
 }) {
+  const routeur = useRouter()
   const [enCours, demarrer] = useTransition()
   const [retirees, retirer] = useOptimistic<string[], string>(
     [],
@@ -44,6 +46,9 @@ export function ListeTaches({
     demarrer(async () => {
       retirer(tache.id)
       await completerTache(tache.id)
+      // Vide le cache de navigation : sans ça, l'accueil resservirait la
+      // liste d'avant en revenant par la barre d'onglets.
+      routeur.refresh()
     })
   }
 
@@ -51,6 +56,7 @@ export function ListeTaches({
     demarrer(async () => {
       retirer(tache.id)
       await reporterTache(tache.id, 1)
+      routeur.refresh()
     })
   }
 
