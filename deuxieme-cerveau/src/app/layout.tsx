@@ -41,6 +41,20 @@ export const viewport: Viewport = {
   ],
 }
 
+/**
+ * Pose le thème choisi avant la première peinture.
+ *
+ * La préférence vit dans `localStorage` et non dans un cookie : lire un
+ * cookie ici rendrait dynamiques les routes aujourd'hui prérendues, dont
+ * `/hors-ligne` — celle que le service worker doit pouvoir servir sans réseau.
+ *
+ * Le script est inline et bloquant, donc il s'exécute avant tout rendu : pas
+ * de clignotement clair→sombre. S'il échoue — navigation privée stricte,
+ * stockage refusé — on retombe sur `color-scheme: light dark`, c'est-à-dire
+ * sur la préférence du système, qui est le bon défaut.
+ */
+const SCRIPT_THEME = `try{var t=localStorage.getItem('theme');if(t==='clair'||t==='sombre'){document.documentElement.dataset.theme=t;var m=document.querySelector('meta[name=theme-color]:not([media])')||document.head.appendChild(Object.assign(document.createElement('meta'),{name:'theme-color'}));m.content=t==='sombre'?'#131316':'#f7f7f5'}}catch(e){}`
+
 export default function LayoutRacine({
   children,
 }: {
@@ -48,6 +62,9 @@ export default function LayoutRacine({
 }) {
   return (
     <html lang="fr" className={`${interfaceTypo.variable} ${chiffresTypo.variable}`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_THEME }} />
+      </head>
       <body>
         {children}
         <EnregistrementServiceWorker />

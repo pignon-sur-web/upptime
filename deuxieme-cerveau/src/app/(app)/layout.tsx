@@ -1,6 +1,18 @@
 import { BarreOnglets } from '@/components/nav/BarreOnglets'
 
 /**
+ * La coquille commune : la hauteur d'écran et la barre d'onglets, rien de plus.
+ *
+ * La largeur, elle, a été descendue d'un cran, dans deux layouts frères —
+ * `(colonne)` et `(tableau)`. Il y a désormais deux gabarits et non plus un :
+ * les écrans de section sont des colonnes étroites qu'on lit au pouce, le
+ * tableau de bord est une planche large qu'on balaie du regard. La largeur est
+ * une propriété du gabarit, donc elle appartient à un layout ; comme il y a
+ * deux gabarits, il y a deux layouts. Les parenthèses sont des groupes de
+ * routes : elles n'apparaissent dans aucune URL.
+ */
+
+/**
  * Toutes les pages lisent la base et dépendent du cookie de session : elles
  * sont dynamiques de fait. L'écrire explicitement évite qu'un remaniement les
  * rende statiques par accident, ce qui produirait un tableau de bord figé sans
@@ -18,14 +30,7 @@ export default function LayoutApplication({
 }) {
   return (
     <div className="min-h-ecran">
-      {/* Une colonne sur mobile, centrée et bornée au-delà : le contenu ne
-          s'étale jamais sur toute la largeur d'un écran d'ordinateur.
-          L'espacement entre les cartes est porté ici et pas par les cartes :
-          c'est ce qui garantit qu'il est le même partout, y compris entre
-          deux cartes rendues par des composants qui s'ignorent. */}
-      <main className="mx-auto flex max-w-2xl flex-col gap-3 px-3 pb-28">
-        {children}
-      </main>
+      {children}
       <BarreOnglets />
     </div>
   )

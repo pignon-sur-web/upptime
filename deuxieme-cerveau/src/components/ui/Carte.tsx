@@ -31,12 +31,16 @@ export function Carte({
 }
 
 /**
- * L'en-tête d'une carte : un emoji, un titre, et une action à droite.
+ * L'en-tête d'une carte : une pilule gris pâle, et une action à droite.
  *
- * L'emoji n'est pas un ornement — c'est le repère qu'on attrape en
- * balayant la page du pouce, avant même d'avoir lu le titre. Il est
- * `aria-hidden` : le titre porte déjà l'information pour un lecteur
- * d'écran, et « emoji vague d'eau » n'apprendrait rien.
+ * Le titre n'est pas posé nu sur la carte, il est enfermé dans une pastille.
+ * C'est ce qui le fait lire comme une **étiquette de bloc** plutôt que comme
+ * la première ligne du contenu — sur une page qui empile dix cartes, un titre
+ * en gras sans fond finit par se confondre avec les lignes qu'il chapeaute.
+ *
+ * L'emoji n'est pas un ornement : c'est le repère qu'on attrape en balayant
+ * la page du pouce, avant même d'avoir lu le titre. Il est `aria-hidden` — le
+ * titre porte déjà l'information, et « emoji vague d'eau » n'apprendrait rien.
  */
 export function EnTeteCarte({
   titre,
@@ -49,9 +53,9 @@ export function EnTeteCarte({
 }) {
   return (
     <div className="mb-3 flex items-center justify-between gap-3">
-      <h2 className="flex min-w-0 items-center gap-2 text-15 font-semibold">
+      <h2 className="inline-flex min-w-0 items-center gap-1.5 rounded-petit bg-neutre-fond px-2 py-1 text-13 font-medium">
         {emoji ? (
-          <span aria-hidden className="shrink-0 text-15">
+          <span aria-hidden className="shrink-0">
             {emoji}
           </span>
         ) : null}

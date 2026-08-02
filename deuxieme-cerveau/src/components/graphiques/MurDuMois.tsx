@@ -62,8 +62,12 @@ export function MurDuMois({
   // de la dernière ligne.
   const hauteur = lignes * COTE + (lignes - 1) * ESPACE + 2
 
+  // La figure est bornée en largeur : sur un écran d'ordinateur une carte peut
+  // faire 600 px, et le mur donnerait alors des cases de 80 px. À cette taille
+  // on ne lit plus une texture, on lit un damier.
+
   return (
-    <figure>
+    <figure className="max-w-sm">
       <svg
         viewBox={`0 0 ${largeur} ${hauteur}`}
         className="w-full"

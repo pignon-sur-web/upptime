@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { headers } from 'next/headers'
 import { EnTeteSection } from '@/components/nav/EnTete'
 import { Widget } from '@/components/ui/Widget'
+import { ChoixTheme } from '@/components/reglages/ChoixTheme'
 import { WIDGETS, widgetsAffiches } from '@/components/widgets/registre'
 import { reglagesWidgets } from '@/lib/donnees/widgets'
 import { basculerWidget, deplacerWidget } from '@/lib/actions/reglages'
@@ -22,6 +23,14 @@ export default async function PageReglages() {
   return (
     <>
       <EnTeteSection titre="Réglages" />
+
+      <Widget libelle="Apparence" emoji="🎨">
+        <ChoixTheme />
+        <p className="mt-2 text-11 text-secondaire">
+          « Automatique » suit le réglage de l&apos;appareil. Le choix reste sur
+          cet appareil-ci : il ne voyage pas d&apos;un téléphone à un ordinateur.
+        </p>
+      </Widget>
 
       <Widget
         libelle="Widgets du tableau de bord"

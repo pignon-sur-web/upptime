@@ -1,76 +1,79 @@
 @import 'tailwindcss';
 
 /* —————————————————————————————————————————————————————————————————
-   Tokens
+   Jetons
 
-   Six couleurs, pas une de plus. L'information est portée par le
-   remplissage en Encre, jamais par la teinte. Le mode sombre inverse
-   Encre et Papier sans recalculer quoi que ce soit — c'est possible
-   précisément parce qu'il n'y a aucune teinte à recalculer.
+   Chaque jeton est déclaré UNE fois, en `light-dark(clair, sombre)`.
+
+   La version précédente écrivait la palette claire ici puis la palette
+   sombre en entier dans une media query — deux copies à tenir
+   synchronisées. Ajouter un réglage manuel clair/sombre en aurait
+   demandé une troisième. `light-dark()` supprime le problème à la
+   racine : la fonction lit le `color-scheme` EFFECTIF de l'élément, donc
+   basculer le thème revient à changer une seule propriété, pas une
+   palette.
+
+     :root                      → `light dark`, on suit le système
+     :root[data-theme='clair']  → `light`, on force
+     :root[data-theme='sombre'] → `dark`, on force
+
+   Effet de bord voulu : `color-scheme` pilote aussi les contrôles natifs
+   — sélecteurs de date, barres de défilement, autoremplissage — qui
+   restaient obstinément clairs en thème sombre.
+
+   Sur fond sombre les mêmes teintes seraient illisibles : la seconde
+   valeur remonte la luminosité et baisse la saturation. Le contraste
+   reste au-dessus de 4,5:1 dans les deux thèmes.
    ————————————————————————————————————————————————————————————————— */
 
 :root {
-  --fond: #f7f7f5; /* le fond de page, légèrement plus sourd que les cartes */
-  --carte: #ffffff; /* les cartes s'en détachent */
-  --texte: #1a1a19;
-  --secondaire: #7c7c78;
-  --trait: #e9e9e6;
+  color-scheme: light dark;
+
+  --fond: light-dark(#f7f7f5, #131316); /* plus sourd que les cartes */
+  --carte: light-dark(#ffffff, #1b1b1f); /* les cartes s'en détachent */
+  --texte: light-dark(#1a1a19, #ececea);
+  --secondaire: light-dark(#7c7c78, #8d8d92);
+  --trait: light-dark(#e9e9e6, #2a2a30);
 
   /* Les couleurs de statut. Chacune a un ton plein pour le texte et la
      pastille, et un fond très pâle pour le badge : c'est ce qui rend une
      étiquette lisible sans qu'elle crie. */
-  --urgent: #c0392b;
-  --urgent-fond: #fdecea;
-  --important: #b7791f;
-  --important-fond: #fdf3e0;
-  --secondaire-badge: #6b7280;
-  --secondaire-badge-fond: #f0f0ef;
-  --accent: #2f6fd0; /* les cases à cocher, les liens */
-  --accent-fond: #e8f0fc;
+  --urgent: light-dark(#c0392b, #f08a80);
+  --urgent-fond: light-dark(#fdecea, #331d1a);
+  --important: light-dark(#b7791f, #e3b341);
+  --important-fond: light-dark(#fdf3e0, #332a15);
+  --secondaire-badge: light-dark(#6b7280, #9ca3af);
+  --secondaire-badge-fond: light-dark(#f0f0ef, #26262b);
+  --accent: light-dark(#2f6fd0, #6ea8fe); /* les cases à cocher, les liens */
+  --accent-fond: light-dark(#e8f0fc, #16233a);
 
   /* Deux couleurs, et deux seulement : ce qui a réussi, ce qui a raté.
      Elles ne décorent rien — partout où elles apparaissent, elles portent
-     un jugement que le noir et blanc ne pouvait pas porter seul. Tout le
-     reste de l'interface reste en Encre sur Papier. */
-  --reussite: #1a7f4b;
-  --echec: #c0392b;
-  --reussite-fond: #e7f5ee;
-  --echec-fond: #fdecea;
+     un jugement que le noir et blanc ne pouvait pas porter seul. */
+  --reussite: light-dark(#1a7f4b, #4cc38a);
+  --echec: light-dark(#c0392b, #f08a80);
+  --reussite-fond: light-dark(#e7f5ee, #14291f);
+  --echec-fond: light-dark(#fdecea, #331d1a);
 
   --rayon: 10px;
   --rayon-petit: 6px;
-  --ombre: 0 1px 2px rgb(15 15 15 / 0.05), 0 2px 8px rgb(15 15 15 / 0.04);
+  /* `light-dark()` ne prend que des couleurs, pas une ombre entière : on
+     ne bascule donc que la teinte, et l'ombre garde sa géométrie. */
+  --teinte-ombre: light-dark(rgb(15 15 15 / 0.05), rgb(0 0 0 / 0.4));
+  --teinte-ombre-large: light-dark(rgb(15 15 15 / 0.04), rgb(0 0 0 / 0.3));
+  --ombre: 0 1px 2px var(--teinte-ombre), 0 2px 8px var(--teinte-ombre-large);
 
   --duree: 120ms;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --fond: #131316;
-    --carte: #1b1b1f;
-    --texte: #ececea;
-    --secondaire: #8d8d92;
-    --trait: #2a2a30;
+/* Les deux seules surcharges du thème. Le script du layout racine pose
+   l'attribut avant la première peinture, donc aucun clignotement. */
+:root[data-theme='clair'] {
+  color-scheme: light;
+}
 
-    --urgent: #f08a80;
-    --urgent-fond: #331d1a;
-    --important: #e3b341;
-    --important-fond: #332a15;
-    --secondaire-badge: #9ca3af;
-    --secondaire-badge-fond: #26262b;
-    --accent: #6ea8fe;
-    --accent-fond: #16233a;
-
-    /* Sur fond sombre, les mêmes teintes seraient illisibles : on remonte la
-       luminosité et on baisse la saturation. Le contraste reste au-dessus de
-       4,5:1 dans les deux thèmes. */
-    --reussite: #4cc38a;
-    --echec: #f08a80;
-    --reussite-fond: #14291f;
-    --echec-fond: #331d1a;
-
-    --ombre: 0 1px 2px rgb(0 0 0 / 0.4), 0 2px 8px rgb(0 0 0 / 0.3);
-  }
+:root[data-theme='sombre'] {
+  color-scheme: dark;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -225,6 +228,46 @@
 }
 
 @layer components {
+  /* La rangée du tableau de bord.
+
+     Un flex qui enveloppe, et pas une grille à colonnes déclarées. La
+     différence compte : une grille réserve ses pistes à l'avance, alors
+     qu'un flex répartit l'espace entre les enfants QUI EXISTENT. Or onze
+     des quinze widgets rendent `null` quand ils n'ont rien à dire — un
+     widget muet disparaît donc de la rangée, au lieu d'y laisser un tiers
+     de largeur blanche.
+
+     Trois autres raisons d'écarter les solutions habituelles : CSS
+     `columns` casserait l'ordre de lecture (le deuxième widget
+     atterrirait en bas de la première colonne, ce qui trahirait l'ordre
+     réglé dans /reglages) et couperait une carte en deux ;
+     `grid-auto-flow: dense` ne rebouche que les trous laissés par des
+     éléments à cheval sur plusieurs pistes, donc ici il ne fait rien.
+
+     L'espacement est porté par le conteneur, comme partout ailleurs. */
+  .rangee {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  /* `min-width: 0` n'est pas cosmétique : sans lui, une carte contenant un
+     `truncate` refuse de descendre sous sa largeur min-content et pousse
+     la page en débordement horizontal. */
+  .rangee > * {
+    flex: 1 1 19rem;
+    min-width: 0;
+  }
+
+  .rangee > .bloc-plein {
+    flex-basis: 100%;
+  }
+
+  .rangee > .bloc-moitie {
+    flex-basis: 26rem;
+  }
+
   /* Le bloc. Toute l'interface est faite de ces cartes posées sur le fond
      sourd : c'est la seule façon dont un contenu se détache. La géométrie
      est ici et nulle part ailleurs — un widget qui redéfinirait son rayon

@@ -36,3 +36,41 @@ export const ONGLETS: readonly { href: Route; nom: string }[] = [
   { href: '/taches', nom: 'Tâches' },
   { href: '/argent', nom: 'Argent' },
 ]
+
+/**
+ * La grille de lancement, en tête du tableau de bord.
+ *
+ * Ce n'est PAS `SECTIONS` réordonné, et il ne faut pas chercher à l'en
+ * dériver. Trois raisons, dont chacune suffirait :
+ *
+ *   — elle contient `/taches` et `/argent`, qui sont des ONGLETS et n'ont
+ *     jamais été dans `SECTIONS` ;
+ *   — son ordre est l'inverse du sien. `SECTIONS` descend du rare vers le
+ *     quotidien parce que le panneau « Tout » se lit au pouce, de bas en
+ *     haut ; une grille se lit à l'œil, de gauche à droite et de haut en bas,
+ *     donc le quotidien vient en premier ;
+ *   — les dix premières entrées reprennent la maquette dans son ordre exact,
+ *     y compris ses libellés à elle — « To-do list », « Finances » — qui ne
+ *     sont pas les noms internes des sections.
+ *
+ * Deux ordres opposés pour deux gestes opposés. Les fusionner reviendrait à
+ * en sacrifier un.
+ */
+export type Lancement = { href: Route; libelle: string; emoji: string }
+
+export const LANCEMENT: readonly Lancement[] = [
+  { href: '/habitudes', libelle: 'Habitudes', emoji: '🔁' },
+  { href: '/taches', libelle: 'To-do list', emoji: '✅' },
+  { href: '/agenda', libelle: 'Agenda', emoji: '📅' },
+  { href: '/projets', libelle: 'Projets', emoji: '📁' },
+  { href: '/cours', libelle: 'Cours', emoji: '🎓' },
+  { href: '/objectifs', libelle: 'Objectifs', emoji: '🎯' },
+  { href: '/argent', libelle: 'Finances', emoji: '💶' },
+  { href: '/sport', libelle: 'Sport', emoji: '🥋' },
+  { href: '/notes', libelle: 'Notes', emoji: '📝' },
+  { href: '/lectures', libelle: 'Lectures', emoji: '📖' },
+  { href: '/inbox', libelle: 'Inbox', emoji: '📥' },
+  { href: '/journal', libelle: 'Journal', emoji: '🌙' },
+  { href: '/clients', libelle: 'Clients', emoji: '🤝' },
+  { href: '/reglages', libelle: 'Réglages', emoji: '⚙️' },
+]

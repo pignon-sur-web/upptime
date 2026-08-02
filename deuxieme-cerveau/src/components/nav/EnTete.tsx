@@ -4,18 +4,30 @@ import type { ReactNode } from 'react'
 import { aujourdhui, jourLong } from '@/lib/date'
 
 /**
- * En-tête minimal du tableau de bord : la date du jour en Geist Mono, et rien
- * d'autre. C'est le seul repère temporel dont l'application a besoin en
- * permanence.
+ * L'en-tête du tableau de bord : l'emoji, le nom, la date.
+ *
+ * Le titre est le nom de l'outil et non la date du jour, comme dans la
+ * maquette. Ça peut sembler un recul — la date est une information, un titre
+ * fixe n'en est pas une — mais un tableau de bord a besoin d'une entrée : on
+ * ouvre quelque chose, pas une journée. La date reste, au-dessus, en petit,
+ * et le jour long en dessous ; on n'a rien perdu, on a gagné un seuil.
+ *
+ * Un seul `<h1>`, et en tête du DOM : le banc de parcours interroge
+ * `document.querySelector('h1')` sur l'accueil pour contrôler que la police
+ * d'interface est bien appliquée.
  */
 export function EnTeteJour() {
   const jour = aujourdhui()
   return (
-    <header className="px-1 pt-8 pb-1">
-      <p className="chiffres text-13 text-secondaire">{jour}</p>
-      <h1 className="mt-1 text-24 font-semibold first-letter:uppercase">
-        {jourLong(jour)}
-      </h1>
+    <header className="px-1 pt-8 pb-2">
+      <p aria-hidden className="text-40 leading-none">
+        🧠
+      </p>
+      <h1 className="mt-2 text-40 font-bold tracking-[-0.02em]">2ᵉ CERVEAU</h1>
+      <p className="mt-1 text-13 text-secondaire">
+        <span className="chiffres">{jour}</span>
+        <span className="first-letter:uppercase"> · {jourLong(jour)}</span>
+      </p>
     </header>
   )
 }
