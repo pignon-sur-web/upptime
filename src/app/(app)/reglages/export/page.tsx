@@ -15,7 +15,11 @@ export default async function PageExport() {
 
       <Widget
         libelle="Tout exporter"
-        action={<span className="chiffres text-13">{total} lignes</span>}
+        action={
+          <span className="chiffres text-13">
+            {total} ligne{total > 1 ? 's' : ''}
+          </span>
+        }
       >
         {/*
           L'offre gratuite de Supabase n'a pas de sauvegarde automatique. Sans

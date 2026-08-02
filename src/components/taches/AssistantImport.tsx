@@ -297,7 +297,11 @@ function EtapeAssociation({
     <>
       <Widget
         libelle="Lecture du fichier"
-        action={<span className="chiffres text-13">{nbLignes} lignes</span>}
+        action={
+          <span className="chiffres text-13">
+            {nbLignes} ligne{nbLignes > 1 ? 's' : ''}
+          </span>
+        }
       >
         <div className="flex gap-4">
           <div className="flex-1">

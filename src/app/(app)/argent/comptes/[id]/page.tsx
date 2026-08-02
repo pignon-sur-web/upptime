@@ -43,7 +43,9 @@ export default async function PageCompte({
         ) : null}
 
         <p className="mt-2 flex flex-wrap gap-x-3 text-11 text-secondaire">
-          <span className="chiffres">{compte.nbEcritures} écritures</span>
+          <span className="chiffres">
+            {compte.nbEcritures} écriture{compte.nbEcritures > 1 ? 's' : ''}
+          </span>
           <span className="chiffres">
             ouverture {euros(compte.ouvertureCents)}
           </span>

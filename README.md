@@ -114,12 +114,17 @@ connue : un utilitaire forcé (`rounded-full!`).
 ## Vérification
 
 ```bash
-npm run verifier            # types, lint, build
-npm run verifier:parcours   # 23 contrôles au navigateur (serveur lancé requis)
-npm run verifier:da         # rayon et ombre réellement neutralisés
-npm run verifier:sql        # migrations + logique calculée sur un Postgres jetable
-npm run verifier:csv        # analyseur CSV sur ses cas limites
+npm run verifier              # types, lint, build
+npm run verifier:sql          # migrations + logique calculée sur un Postgres jetable
+npm run verifier:csv          # analyseur CSV sur ses cas limites
+npm run verifier:fuseau       # le fuseau, aux heures où il casse
+npm run verifier:parcours     # la porte d'entrée, au navigateur (serveur lancé)
+npm run verifier:da           # rayon et ombre réellement neutralisés
+npm run verifier:application  # les six gestes qui comptent, contre une vraie base
 ```
+
+Les trois premiers ne demandent rien ; les trois derniers veulent un serveur
+lancé sur `localhost:3000`.
 
 `verifier:sql` demande un Postgres local sur `/var/lib/pgtest:5433`. Il applique
 les dix migrations sur une base neuve puis contrôle ce qui compte vraiment :
@@ -128,6 +133,18 @@ quotidienne en retard de huit jours ne produit qu'une occurrence, qu'un loyer
 mensuel né le 31 ne dérive pas, qu'un virement laisse le net mensuel inchangé,
 qu'un rapprochement de solde crée exactement l'écart, et qu'`anon` ne peut lire
 aucune table ni aucune vue.
+
+`verifier:fuseau` interroge `lib/date.ts` à des instants choisis plutôt qu'à
+l'heure qu'il est : cocher à 23h55 puis à 00h30 heure belge, les deux bascules
+de l'heure d'été, le 1er janvier à 00h30. C'est le seul moyen de tester en
+plein jour un défaut qui ne se manifeste qu'entre minuit et 2h du matin.
+
+`verifier:application` joue les six gestes qui décident si l'application sert :
+cocher une habitude, reporter une tâche, importer un CSV à point-virgule puis
+annuler le lot, rapprocher un solde, faire puis défaire un virement, mesurer un
+objectif décroissant. Il **écrit dans la base** pointée par `.env.local` ; tout
+porte le préfixe `ZZ-test` et `scripts/nettoyer-tests.sql` l'efface sans
+toucher au reste.
 
 `verifier:csv` couvre l'analyseur : le point-virgule d'un export Excel
 français, une virgule enfermée dans des guillemets, un titre multiligne, le

@@ -170,7 +170,11 @@ async function VueMois() {
 
       <Widget
         libelle={`Le mois — ${moisLong(aujourdhui())}`}
-        action={<span className="chiffres text-13">{mois.nbEcritures} écritures</span>}
+        action={
+          <span className="chiffres text-13">
+            {mois.nbEcritures} écriture{mois.nbEcritures > 1 ? 's' : ''}
+          </span>
+        }
       >
         <div className="flex items-end justify-between gap-4">
           <p className="chiffres text-40 leading-none">
