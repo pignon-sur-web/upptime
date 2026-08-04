@@ -104,10 +104,18 @@ connue : un utilitaire forcé (`rounded-full!`).
 
 ```bash
 npm run verifier            # types, lint, build
+npm run verifier:sql        # 30 contrôles : migrations + logique calculée
+npm run verifier:csv        # 44 contrôles : analyseur CSV et devinettes d'import
+npm run verifier:argent     # 35 contrôles : analyse et formatage des montants
 npm run verifier:parcours   # 23 contrôles au navigateur (serveur lancé requis)
 npm run verifier:da         # rayon et ombre réellement neutralisés
-npm run verifier:sql        # migrations + logique calculée sur un Postgres jetable
+npm run types               # régénère les types depuis le schéma réel
 ```
+
+`verifier:csv` et `verifier:argent` portent sur de la logique pure, sans base.
+Ce sont eux qui ont trouvé les deux vrais défauts du projet : `12,345` était
+interprété comme 12 345 € au lieu d'être refusé, et la détection du séparateur
+CSV se faisait piéger par les virgules d'un champ de note.
 
 `verifier:sql` demande un Postgres local sur `/var/lib/pgtest:5433`. Il applique
 les neuf migrations sur une base neuve puis contrôle ce qui compte vraiment :
