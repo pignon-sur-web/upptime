@@ -96,27 +96,33 @@ au rendu, les écritures en POST. Pas de `services/`, pas de `repositories/`.
 
 ---
 
-## Direction artistique — appliquée par l'outillage
+## Direction artistique
 
-> **Révision d'août 2026.** La première version était monochrome : aucun rayon,
-> aucune ombre, aucune teinte, l'information portée par le seul remplissage en
-> Encre. Elle était cohérente et elle était illisible à l'usage — un tableau de
-> bord entièrement gris ne dit pas où regarder. Le système ci-dessous la
-> remplace. La méthode, elle, n'a pas changé : ce que la DA n'autorise pas
-> n'existe pas dans Tailwind.
+> **Révision d'août 2026, deuxième passe.** La première version était
+> monochrome. La deuxième — celle décrite ci-dessous — l'a remplacée par un
+> système de cartes coloré, mais **fermé par l'outillage** : les espaces de
+> noms Tailwind étaient vidés avec `initial`, si bien que `rounded-xl` ou
+> `text-red-500` ne compilaient pas.
+>
+> Le 4 août 2026, cette fermeture a été levée à la demande de l'utilisateur,
+> pour installer la skill `ui-ux-pro-max` (84 styles, 192 palettes,
+> `.claude/skills/`). Une base de connaissances de cette nature n'a aucune
+> utilité dans un cadre qui refuse par construction tout ce qu'elle propose.
+>
+> **La contrepartie a été dite avant d'être acceptée** : c'est ce garde-fou qui
+> empêchait l'interface de dériver vers un assemblage de cartes toutes
+> légèrement différentes. Ce qui suit décrit donc un vocabulaire de référence,
+> plus une contrainte vérifiée.
 
-`src/app/globals.css` vide les espaces de noms puis redéclare les seules
-valeurs du système. Après ça, `text-red-500`, `rounded-xl` et `shadow-2xl` ne
-compilent pas.
+Les jetons vivent dans `src/app/globals.css`. Ce sont eux qu'on emploie par
+défaut, et ce dans quoi on traduit ce que la skill propose.
 
 ```css
 @theme {
-  --color-*: initial;  --radius-*: initial;  --shadow-*: initial;
-  --text-*: initial;   --font-*: initial;    --blur-*: initial;
-
   --radius-petit: 6px;   /* cases, pastilles, champs */
   --radius-carte: 10px;  /* tout ce qui est un bloc */
   --radius-plein: 999px; /* pilules et jauges */
+  /* échelle typographique : 11 / 13 / 15 / 18 / 24 / 40 / 72 */
 }
 
 @theme inline {
@@ -127,9 +133,15 @@ compilent pas.
 }
 ```
 
-`@theme inline` fait pointer les utilitaires sur la variable et non sur sa
-valeur : la bascule clair/sombre tient dans la seule media query, sans classe
-`dark:`.
+Les couleurs elles-mêmes sont déclarées une fois, en `light-dark(clair,
+sombre)` : basculer le thème revient à changer `color-scheme`, une propriété,
+pas une palette. Le sélecteur des Réglages ne fait rien d'autre que poser
+`data-theme` sur `<html>`.
+
+`verifier:da` ne contrôle plus la fermeture — il ne reste rien à fermer. Il
+vérifie que **les dix-sept jetons de couleur se résolvent en une vraie couleur
+dans les deux thèmes**, ce qui est le défaut qui casse le plus silencieusement :
+un jeton retiré rend la propriété invalide, sans erreur ni avertissement.
 
 ### Les couleurs disent trois choses
 
@@ -463,14 +475,16 @@ autonome sous son propre `<Suspense>`, ses lectures enveloppées dans `cache()`
 ## Vérification finale
 
 - `npm run build`, `npx tsc --noEmit`, `npm run lint` propres.
-- Assertion ciblée sur le CSS généré : `rounded-lg` et `shadow-md` **n'existent
-  pas** dans la sortie (c'est ce qui prouve que la neutralisation des espaces de
-  noms Tailwind a pris, un build vert ne le dirait pas).
+- Assertion au navigateur sur les jetons : les dix-sept couleurs se résolvent
+  en `rgb(...)` dans les deux thèmes, et le fond diffère bien de l'un à l'autre
+  (un jeton retiré rend la propriété invalide en silence ; un build vert ne le
+  dirait pas). Depuis le 4 août 2026, plus rien ne vérifie l'ABSENCE d'une
+  classe Tailwind — les espaces de noms ne sont plus fermés.
 - Parcours réels au navigateur (Chromium préinstallé, Playwright) une fois vos
   clés en place : connexion, cochage d'habitude, ajustement de solde, virement,
   report de tâche, import CSV.
-- Captures en clair et en sombre pour contrôler polices, échelle typographique,
-  fermeture des espaces de noms et rendu réel de la carte.
+- Captures en clair et en sombre pour contrôler polices, échelle typographique
+  et rendu réel de la carte.
 - Grep de non-régression : aucun `current_date`, aucun `toISOString().slice`.
 
 ## Ce dont j'ai besoin de vous

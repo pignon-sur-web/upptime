@@ -83,41 +83,39 @@
 }
 
 /* —————————————————————————————————————————————————————————————————
-   Ce que la direction artistique n'autorise pas n'existe pas dans
-   Tailwind.
+   Le vocabulaire de la maison, et rien de fermé autour.
 
-   Vider un espace de noms avec `initial` supprime les utilitaires
-   correspondants ; les quelques valeurs redéclarées juste après sont
-   alors les SEULES qui compilent. `text-red-500` et `shadow-2xl`
-   n'existent pas ; `rounded-carte` et `ombre-carte` oui. La règle
-   n'est pas une consigne, c'est une contrainte de l'outil.
+   Ce bloc vidait autrefois les espaces de noms Tailwind avec `initial`.
+   `text-red-500`, `rounded-xl` et `shadow-2xl` ne compilaient pas : la
+   direction artistique n'était pas une consigne, c'était une contrainte
+   de l'outil, et le banc `verifier:da` refusait toute valeur hors
+   échelle.
 
-   L'échelle des rayons tient en trois valeurs et celle des ombres en
-   une seule : c'est ce qui empêche l'interface de dériver vers un
-   assemblage de cartes toutes légèrement différentes.
+   Levé le 4 août 2026, sciemment. L'installation de la skill
+   `ui-ux-pro-max` — 84 styles, 192 palettes, 74 appariements de polices
+   — n'a aucun sens dans un cadre qui refuse par construction tout ce
+   qu'elle propose. Ouvrir les échelles était le prix de son utilité.
+
+   Ce qui reste vrai : les jetons ci-dessous sont le vocabulaire de
+   l'application. `--color-accent`, `--radius-carte`, `--text-13` sont
+   ce qu'on emploie par défaut, et ce dans quoi on traduit ce que la
+   skill propose. Les échelles Tailwind sont désormais disponibles à
+   côté ; elles ne sont pas devenues le premier réflexe.
+
+   Ce qui n'est plus vrai : rien ne l'empêche mécaniquement. C'est une
+   discipline, plus une contrainte — et une discipline se perd. Le
+   garde-fou qui empêchait l'interface de dériver vers un assemblage de
+   cartes toutes légèrement différentes n'existe plus.
    ————————————————————————————————————————————————————————————————— */
 
 @theme {
-  --color-*: initial;
-  --radius-*: initial;
-  --shadow-*: initial;
-  --inset-shadow-*: initial;
-  --drop-shadow-*: initial;
-  --text-shadow-*: initial;
-  --blur-*: initial;
-  --font-*: initial;
-  --text-*: initial;
-
-  --color-transparent: transparent;
-  --color-current: currentColor;
-
-  /* Trois rayons. `petit` pour les cases et les pastilles, `carte` pour
-     tout ce qui est un bloc, `plein` pour les ronds. */
+  /* Trois rayons maison. `petit` pour les cases et les pastilles,
+     `carte` pour tout ce qui est un bloc, `plein` pour les ronds. */
   --radius-petit: 6px;
   --radius-carte: 10px;
   --radius-plein: 999px;
 
-  /* Échelle typographique imposée : 11 / 13 / 15 / 18 / 24 / 40 / 72. */
+  /* Échelle typographique maison : 11 / 13 / 15 / 18 / 24 / 40 / 72. */
   --text-11: 11px;
   --text-11--line-height: 16px;
   --text-13: 13px;

@@ -112,14 +112,24 @@ d'`AUTH_SECRET`, comparé en temps constant, et le flux ne porte que des titres
 et des dates — jamais un montant, une note ou un solde. Régénérer
 `AUTH_SECRET` coupe l'abonnement en même temps que les sessions.
 
-**La direction artistique est imposée par l'outillage.** Les espaces de noms
-Tailwind `--color-*`, `--radius-*` et `--shadow-*` sont vidés puis redéclarés
-avec les seules valeurs du système : `text-red-500`, `rounded-xl` et
-`shadow-2xl` ne compilent pas, `text-urgent`, `rounded-carte` et `shadow-carte`
-oui. L'échelle tient en **trois rayons et une ombre**, parce que c'est comme ça
-qu'une échelle meurt — un rayon à la fois. `verifier:da` recompte les jetons et
-relit les composants à chaque exécution, valeurs arbitraires (`rounded-[2px]`)
-comprises.
+**La direction artistique est une discipline, plus une contrainte.** Elle était
+imposée par l'outillage jusqu'au 4 août 2026 : les espaces de noms Tailwind
+`--color-*`, `--radius-*` et `--shadow-*` étaient vidés, si bien que
+`text-red-500`, `rounded-xl` et `shadow-2xl` ne compilaient pas. L'installation
+de la skill `ui-ux-pro-max` (voir `.claude/skills/`) a levé cette fermeture —
+une base de 84 styles et 192 palettes n'a aucune utilité dans un cadre qui
+refuse par construction tout ce qu'elle propose.
+
+Ce qui reste vrai : **les jetons de `src/app/globals.css` sont le vocabulaire
+de l'application.** `--color-accent`, `--radius-carte`, `--text-13` sont ce
+qu'on emploie par défaut, et ce dans quoi on traduit ce que la skill propose.
+Les échelles Tailwind sont disponibles à côté ; elles ne sont pas le premier
+réflexe.
+
+Ce qui n'est plus vrai : plus rien ne l'empêche mécaniquement. Le garde-fou qui
+tenait l'interface à trois rayons et une ombre n'existe plus, et c'était lui
+qui l'empêchait de dériver vers un assemblage de cartes toutes légèrement
+différentes. C'est désormais à la relecture de le faire.
 
 **Les couleurs disent trois choses, et rien d'autre.** Le **bleu** marque une
 action que j'ai faite ou l'endroit où je suis : case cochée, onglet actif,
@@ -140,7 +150,7 @@ npm run verifier:csv          # analyseur CSV sur ses cas limites
 npm run verifier:fuseau       # le fuseau, aux heures où il casse
 npm run verifier:ics          # le flux iCalendar, sur ce qui casse un abonnement
 npm run verifier:parcours     # la porte d'entrée, au navigateur (serveur lancé)
-npm run verifier:da           # échelles fermées, carte réellement rendue
+npm run verifier:da           # les jetons se résolvent dans les deux thèmes
 npm run verifier:application  # les six gestes qui comptent, contre une vraie base
 ```
 

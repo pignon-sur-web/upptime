@@ -1,30 +1,38 @@
 /*
- * La direction artistique, vérifiée par la machine.
+ * Les jetons de couleur, vérifiés au navigateur.
  *
  *   npm start &
  *   npm run verifier:da
  *
- * L'application a changé de langage visuel : elle est passée d'un monochrome
- * sans rayon ni ombre à un système de cartes coloré. Ce banc a changé avec
- * elle, mais son rôle n'a pas bougé — empêcher la dérive.
+ * ─── Ce banc a changé de rôle le 4 août 2026 ──────────────────────────────
  *
- * Une palette et une échelle ne tiennent pas parce qu'elles sont écrites dans
- * un fichier de règles : elles tiennent parce que l'outil refuse ce qui n'y
- * est pas. Trois vérifications, dans cet ordre :
+ * Il vérifiait jusque-là que la direction artistique était FERMÉE : espaces de
+ * noms Tailwind vidés, trois rayons, une ombre, et aucune valeur hors échelle
+ * dans les composants. Il échouait si quelqu'un écrivait `rounded-xl`.
  *
- *   1. Les espaces de noms sont fermés. `--color-*`, `--radius-*` et
- *      `--shadow-*` sont vidés avec `initial` avant d'être redéclarés, donc
- *      `text-red-500`, `rounded-xl` et `shadow-2xl` ne compilent pas.
- *   2. Les échelles restent courtes. Trois rayons, une ombre. Le jour où
- *      quelqu'un en ajoute un quatrième, ce banc le dit — parce que c'est
- *      comme ça qu'une échelle meurt : un rayon à la fois.
- *   3. Le code source n'emploie que ces valeurs-là, et le rendu les applique
- *      vraiment. Une carte sans rayon ni ombre au navigateur voudrait dire
- *      que quelque chose les annule encore.
+ * L'installation de la skill `ui-ux-pro-max` a levé cette fermeture — une base
+ * de 84 styles et 192 palettes n'a aucune utilité dans un cadre qui refuse par
+ * construction tout ce qu'elle propose. Les trois contrôles correspondants ont
+ * donc été retirés. Ce n'est pas un affaiblissement accidentel : c'est une
+ * décision, elle est documentée dans `src/app/globals.css` et dans le README.
+ *
+ * Ce qui reste à protéger n'a pas disparu pour autant, et c'est même la partie
+ * qui casse le plus silencieusement. Les jetons sémantiques — `--accent`,
+ * `--reussite`, `--urgent-fond` et les autres — sont employés par des dizaines
+ * de composants. Le jour où l'un d'eux est retiré ou mal orthographié, la
+ * propriété CSS devient simplement invalide : aucune erreur de compilation,
+ * aucun avertissement, l'élément hérite d'une couleur voisine et personne ne
+ * s'en aperçoit avant de regarder une capture d'écran.
+ *
+ * Ce banc résout donc chaque jeton dans un vrai navigateur, DANS LES DEUX
+ * THÈMES — parce qu'ils sont déclarés en `light-dark()` et qu'un seul des deux
+ * versants peut être faux.
  */
 
 import { chromium } from 'playwright'
-import { globSync, readFileSync } from 'node:fs'
+
+const CHROME = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'
+const BASE = 'http://localhost:3000'
 
 const resultats = []
 const verifier = (nom, ok, detail = '') => {
@@ -32,108 +40,129 @@ const verifier = (nom, ok, detail = '') => {
   console.log(`${ok ? '  ok  ' : ' ECHEC'}  ${nom}${detail ? ` — ${detail}` : ''}`)
 }
 
-// ————————————————————————————————————————————————————————————————
-// 1. Les espaces de noms sont fermés dans la source des jetons.
-// ————————————————————————————————————————————————————————————————
+/**
+ * Les jetons que l'application emploie. La liste est écrite à la main plutôt
+ * que lue dans `globals.css` : un banc qui dérive sa propre attente du fichier
+ * qu'il contrôle ne contrôle rien — il constaterait la suppression d'un jeton
+ * en même temps qu'il cesserait de l'attendre.
+ */
+const JETONS = [
+  'fond',
+  'carte',
+  'texte',
+  'secondaire',
+  'trait',
+  'urgent',
+  'urgent-fond',
+  'important',
+  'important-fond',
+  'secondaire-badge',
+  'secondaire-badge-fond',
+  'accent',
+  'accent-fond',
+  'reussite',
+  'echec',
+  'reussite-fond',
+  'echec-fond',
+]
 
-const source = readFileSync('src/app/globals.css', 'utf8')
-
-for (const espace of ['color', 'radius', 'shadow', 'text', 'font', 'blur']) {
-  verifier(
-    `espace de noms fermé : --${espace}-*`,
-    source.includes(`--${espace}-*: initial;`),
-  )
-}
-
-// ————————————————————————————————————————————————————————————————
-// 2. Les échelles restent courtes.
-// ————————————————————————————————————————————————————————————————
-
-/** Les jetons déclarés dans les blocs `@theme`, par espace de noms. */
-const declares = (espace) => {
-  const trouves = new Set()
-  for (const bloc of source.matchAll(/@theme[^{]*\{([\s\S]*?)\n\}/g)) {
-    for (const m of bloc[1].matchAll(new RegExp(`--${espace}-([\\w-]+):`, 'g'))) {
-      if (m[1] !== '*') trouves.add(m[1])
-    }
-  }
-  return [...trouves]
-}
-
-const rayons = declares('radius')
-verifier(
-  `échelle des rayons : ${rayons.length} valeur${rayons.length > 1 ? 's' : ''}`,
-  rayons.length === 3,
-  rayons.join(', '),
-)
-
-const ombres = declares('shadow')
-verifier(
-  `échelle des ombres : ${ombres.length} valeur${ombres.length > 1 ? 's' : ''}`,
-  ombres.length === 1,
-  ombres.join(', '),
-)
-
-// ————————————————————————————————————————————————————————————————
-// 3. Le code source n'emploie que ces valeurs-là.
-//
-//    C'est la seule des trois vérifications qu'un développeur peut casser
-//    sans toucher aux jetons : écrire `rounded-full` dans un composant passe
-//    la compilation (Tailwind a ses utilitaires statiques) mais introduit une
-//    quatrième valeur dans une échelle qui en compte trois.
-// ————————————————————————————————————————————————————————————————
-
-const fichiers = globSync('src/**/*.{ts,tsx}')
-const rayonsAutorises = new Set([...rayons, 'none'])
-const ombresAutorisees = new Set([...ombres, 'none'])
-
-const fautes = []
-for (const fichier of fichiers) {
-  const contenu = readFileSync(fichier, 'utf8')
-  // La valeur arbitraire — `rounded-[2px]` — est visée explicitement : c'est
-  // la porte de sortie la plus tentante, et elle contourne l'échelle sans
-  // jamais déclarer de jeton.
-  for (const m of contenu.matchAll(/\brounded(?:-[trbl][lr]?)?-(\[[^\]]+\]|[a-z0-9]+)\b/g)) {
-    if (!rayonsAutorises.has(m[1])) fautes.push(`${fichier} : ${m[0]}`)
-  }
-  for (const m of contenu.matchAll(/\bshadow-(\[[^\]]+\]|[a-z0-9]+)\b/g)) {
-    if (!ombresAutorisees.has(m[1])) fautes.push(`${fichier} : ${m[0]}`)
-  }
-}
-verifier(
-  'aucun rayon ni ombre hors échelle dans les composants',
-  fautes.length === 0,
-  fautes.slice(0, 5).join(' · '),
-)
-
-// ————————————————————————————————————————————————————————————————
-// 4. Le rendu applique bien la carte.
-// ————————————————————————————————————————————————————————————————
-
-const CHROME = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'
 const navigateur = await chromium.launch({ executablePath: CHROME })
+
+for (const schema of ['light', 'dark']) {
+  const contexte = await navigateur.newContext({ colorScheme: schema })
+  const page = await contexte.newPage()
+  await page.goto(`${BASE}/connexion`, { waitUntil: 'networkidle' })
+
+  const valeurs = await page.evaluate((noms) => {
+    /*
+     * `getPropertyValue` rendrait le texte brut « light-dark(#f7f7f5, …) »,
+     * qui ne dit pas lequel des deux versants s'applique. On force donc le
+     * navigateur à résoudre : on peint la variable sur un élément, et on relit
+     * la couleur calculée.
+     */
+    const sonde = document.createElement('div')
+    document.body.append(sonde)
+    const resultat = {}
+    for (const nom of noms) {
+      sonde.style.color = ''
+      sonde.style.color = `var(--${nom})`
+      resultat[nom] = getComputedStyle(sonde).color
+    }
+    sonde.remove()
+    return resultat
+  }, JETONS)
+
+  const invalides = JETONS.filter((nom) => !/^rgba?\(/.test(valeurs[nom] ?? ''))
+  verifier(
+    `les ${JETONS.length} jetons se résolvent en ${schema === 'light' ? 'clair' : 'sombre'}`,
+    invalides.length === 0,
+    invalides.length ? invalides.join(', ') : '',
+  )
+
+  // Deux jetons qui doivent DIFFÉRER d'un thème à l'autre : si la bascule
+  // `light-dark()` cassait, tout se résoudrait quand même — en une seule
+  // palette. Le contrôle ci-dessus passerait sans rien voir.
+  verifier(
+    `le fond du thème ${schema === 'light' ? 'clair' : 'sombre'} est le bon`,
+    valeurs.fond === (schema === 'light' ? 'rgb(247, 247, 245)' : 'rgb(19, 19, 22)'),
+    valeurs.fond,
+  )
+
+  await contexte.close()
+}
+
+// ————————————————————————————————————————————————————————————————
+// La carte se rend vraiment.
+// ————————————————————————————————————————————————————————————————
+
 const page = await (await navigateur.newContext()).newPage()
-await page.goto('http://localhost:3000/connexion', { waitUntil: 'networkidle' })
+await page.goto(`${BASE}/connexion`, { waitUntil: 'networkidle' })
 
 const mesure = await page.evaluate(() => {
   const el = document.createElement('div')
   el.className = 'carte'
   document.body.append(el)
   const c = getComputedStyle(el)
-  return { rayon: c.borderRadius, ombre: c.boxShadow, fond: c.backgroundColor }
+  const carte = { rayon: c.borderRadius, ombre: c.boxShadow, fond: c.backgroundColor }
+  el.remove()
+
+  /*
+   * Et la preuve que les échelles sont bien ouvertes : deux classes Tailwind
+   * standard, qui ne compilaient pas avant le 4 août 2026.
+   *
+   * Elles rendent quelque chose parce que la chaîne « rounded-xl shadow-lg »
+   * apparaît en clair dans CE fichier, que Tailwind scanne comme le reste du
+   * projet. Ce n'est pas un hasard heureux, c'est ce qui rend le contrôle
+   * valide : si les espaces de noms étaient à nouveau vidés avec `initial`,
+   * l'utilitaire n'existerait pas et la sonde retomberait à 0px — le scan ne
+   * peut pas fabriquer une valeur qui n'est plus déclarée nulle part.
+   *
+   * Si ce contrôle échoue, c'est que quelqu'un a remis les `: initial`, et
+   * que la skill `ui-ux-pro-max` est redevenue inutilisable. Il faut le
+   * savoir.
+   */
+  const sonde = document.createElement('div')
+  sonde.className = 'rounded-xl shadow-lg'
+  document.body.append(sonde)
+  const s = getComputedStyle(sonde)
+  const ouvert = { rayon: s.borderRadius, ombre: s.boxShadow }
+  sonde.remove()
+
+  return { carte, ouvert }
 })
 await navigateur.close()
 
-verifier(
-  'la carte a un rayon',
-  /^[1-9]/.test(mesure.rayon),
-  mesure.rayon,
-)
-verifier('la carte a une ombre', mesure.ombre !== 'none', mesure.ombre)
+verifier('la carte a un rayon', /^[1-9]/.test(mesure.carte.rayon), mesure.carte.rayon)
+verifier('la carte a une ombre', mesure.carte.ombre !== 'none', mesure.carte.ombre)
 verifier(
   'la carte se détache du fond',
-  mesure.fond !== 'rgba(0, 0, 0, 0)',
-  mesure.fond,
+  mesure.carte.fond !== 'rgba(0, 0, 0, 0)',
+  mesure.carte.fond,
+)
+verifier(
+  'les échelles Tailwind sont ouvertes',
+  /^[1-9]/.test(mesure.ouvert.rayon) && mesure.ouvert.ombre !== 'none',
+  `rounded-xl → ${mesure.ouvert.rayon}, shadow-lg → ${mesure.ouvert.ombre === 'none' ? 'none' : 'présente'}`,
 )
 
 // ————————————————————————————————————————————————————————————————
