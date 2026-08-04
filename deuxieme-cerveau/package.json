@@ -14,7 +14,8 @@
     "verifier:parcours": "node scripts/verifier-parcours.mjs",
     "verifier:da": "node scripts/verifier-da.mjs",
     "verifier:sql": "bash scripts/verifier-sql.sh",
-    "types": "node scripts/generer-types.mjs"
+    "types": "node scripts/generer-types.mjs",
+    "verifier:csv": "node --experimental-strip-types scripts/verifier-csv.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.111.0",

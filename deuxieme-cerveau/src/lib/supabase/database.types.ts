@@ -833,6 +833,12 @@ export type Database = {
       }
     }
     Functions: {
+      annuler_import: {
+        Args: {
+          p_batch_id: string
+        }
+        Returns: number | null
+      }
       app_today: {
         Args: Record<string, never>
         Returns: string | null
@@ -862,6 +868,13 @@ export type Database = {
           p_note?: string
         }
         Returns: string | null
+      }
+      importer_taches: {
+        Args: {
+          p_lignes: Json
+          p_source?: string
+        }
+        Returns: { batch_id: string | null; taches_creees: number | null; projets_crees: number | null }[]
       }
       passer_tache: {
         Args: {

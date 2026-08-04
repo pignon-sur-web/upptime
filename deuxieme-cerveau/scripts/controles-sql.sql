@@ -182,6 +182,79 @@ begin
 end $$;
 
 -- —————————————————————————————————————————————————————————————————
+-- Import CSV
+-- —————————————————————————————————————————————————————————————————
+do $$
+declare
+  v_batch uuid; v_taches integer; v_projets integer;
+  v_nb_projets integer; v_done_at timestamptz; v_supprimees integer;
+begin
+  delete from public.tasks;
+  delete from public.projects;
+
+  -- Deux lignes désignent le même projet à la casse près : il ne doit être
+  -- créé qu'une fois.
+  select batch_id, taches_creees, projets_crees
+    into v_batch, v_taches, v_projets
+  from public.importer_taches($j$[
+    {"titre":"Appeler le comptable","priorite":"1","echeance":"2026-09-15","projet":"Administratif","statut":"a_faire"},
+    {"titre":"Classer les factures","priorite":"3","echeance":"","projet":"administratif","statut":"a_faire"},
+    {"titre":"Déjà fait","priorite":"","echeance":"","projet":"","statut":"fait"}
+  ]$j$::jsonb, 'export.csv');
+
+  select count(*) into v_nb_projets from public.projects;
+
+  perform pg_temp.verifier(
+    'import : projets rapprochés sans tenir compte de la casse',
+    v_taches = 3 and v_projets = 1 and v_nb_projets = 1,
+    v_taches || ' tâches, ' || v_projets || ' projet créé, ' || v_nb_projets || ' au total'
+  );
+
+  select done_at into v_done_at from public.tasks where title = 'Déjà fait';
+  perform pg_temp.verifier(
+    'import : une ligne déjà faite reçoit son done_at',
+    v_done_at is not null,
+    'la contrainte tasks_done_at_coherent l''exige'
+  );
+
+  -- Annulation du lot : les tâches partent, et le projet créé au passage aussi
+  -- puisqu'il est resté vide.
+  v_supprimees := public.annuler_import(v_batch);
+
+  perform pg_temp.verifier(
+    'annuler un import retire tâches et projets restés vides',
+    v_supprimees = 3
+      and (select count(*) from public.tasks) = 0
+      and (select count(*) from public.projects) = 0
+      and (select count(*) from public.import_batches where id = v_batch) = 0,
+    v_supprimees || ' tâches supprimées'
+  );
+end $$;
+
+do $$
+declare v_batch uuid; v_projet uuid;
+begin
+  delete from public.tasks;
+  delete from public.projects;
+
+  select batch_id into v_batch from public.importer_taches(
+    '[{"titre":"Une tâche","projet":"Gardé"}]'::jsonb, null);
+
+  select id into v_projet from public.projects where name = 'Gardé';
+  -- On rattache autre chose au projet : il ne doit plus disparaître.
+  insert into public.tasks (title, project_id) values ('Ajoutée à la main', v_projet);
+
+  perform public.annuler_import(v_batch);
+
+  perform pg_temp.verifier(
+    'un projet devenu non vide survit à l''annulation',
+    (select count(*) from public.projects where id = v_projet) = 1
+      and (select count(*) from public.tasks) = 1,
+    'seules les lignes du lot sont retirées'
+  );
+end $$;
+
+-- —————————————————————————————————————————————————————————————————
 -- Finances
 -- —————————————————————————————————————————————————————————————————
 do $$

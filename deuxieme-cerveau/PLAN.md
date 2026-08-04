@@ -23,15 +23,49 @@ pas touché du tout**, pas un commit, pas un fichier. Son monitoring continue.
 | Emoji des habitudes | **Conservés en couleur** — seule entorse assumée au monochrome. |
 | Portée | **Les 5 phases**, en une session, un commit par phase. |
 
-### Mise en place du dépôt
+### Où vit réellement le code — révisé en cours de route
 
-1. `create_repository` → `pignon-sur-web/deuxieme-cerveau`, privé, sans
-   initialisation. Si l'organisation refuse la création, bascule automatique sur
-   `sachaverminck1-gif/deuxieme-cerveau` et je vous le signale.
-2. Rattachement à la session en écriture, clone dans `/home/user/deuxieme-cerveau`.
-3. Le travail est poussé sur **`main`**, branche par défaut du nouveau dépôt —
-   il est créé vide pour ça, il n'y a rien à protéger. Aucune *pull request*
-   n'est ouverte sans que vous le demandiez.
+Le dépôt dédié n'a pas pu être créé : l'intégration GitHub de la session n'a
+pas le droit de créer des dépôts, et un dépôt personnel ne peut pas être
+rattaché à une session liée à `pignon-sur-web`. Décision retenue avec vous :
+
+**Le travail vit dans `pignon-sur-web/upptime`, branche
+`claude/deuxieme-cerveau-specs-t8t7ug`, sous-dossier `deuxieme-cerveau/`.**
+Aucun fichier Upptime n'est modifié, le monitoring continue. Le code déménagera
+vers son dépôt définitif plus tard (`git subtree split`, ou simple copie).
+
+---
+
+## État au moment de la reprise
+
+| | |
+|---|---|
+| **Phase 1 — fondations** | Faite, **vérifiée à 23/23 au navigateur**. |
+| **Schéma SQL complet** | Les 9 migrations écrites, appliquées sur un Postgres 16 réel, **23/23 contrôles de logique**, dont les 3 de sécurité. |
+| **Phase 2 — habitudes** | Livrée. Compile, typée, lint propre. **Non vérifiée à l'exécution.** |
+| **Phases 3 à 5** | À faire. |
+
+Quatre commits poussés. `PLAN.md` et `README.md` sont dans le sous-dossier.
+
+### La contrainte qui commande tout le reste
+
+**Cette session ne peut pas joindre Supabase.** La politique réseau de
+l'environnement refuse `*.supabase.co` (403 au CONNECT), et Docker est bloqué
+de la même façon, ce qui a fait échouer la pile Supabase locale. La politique
+étant fixée à la création de la session, elle ne changera pas ici.
+
+Conséquence assumée : **les phases 3 à 5 se construisent sans vérification à
+l'exécution.** Ce qui reste vérifiable ici, et qui sera fait à chaque phase :
+
+- `npm run typecheck`, `npm run lint`, `npm run build` ;
+- `npm run verifier:sql` — les migrations et toute la logique calculée sur un
+  Postgres 16 local, ce qui couvre la partie la plus risquée (récurrences,
+  soldes, rapprochements, verrouillage) ;
+- relecture des requêtes contre les types générés du schéma réel.
+
+Ce qui **ne peut pas** l'être : l'aller-retour supabase-js ↔ PostgREST, et donc
+tout comportement d'écran. Cette dette se solde dans un environnement dont la
+politique réseau autorise `*.supabase.co`, `*.supabase.com` et `api.supabase.com`.
 
 ### Écarts assumés par rapport au brief
 
@@ -398,24 +432,84 @@ différence entre un incident et une perte définitive.
 
 ---
 
-## Séquence — 6 commits
+## Ce qui reste à faire — phases 3 à 5
 
-Le brief demande un arrêt après chaque phase ; vous avez demandé « on fait tout ».
-On construit d'une traite, mais **un commit par phase**, relisible et révocable
-isolément.
+Un commit par phase, relisible et révocable isolément. Chaque phase suit le même
+patron, déjà en place et à réutiliser tel quel plutôt qu'à réinventer :
 
-| # | Contenu | Vérification avant commit |
-|---|---|---|
-| **1** | Phase 1. Échafaudage, tokens CSS, polices, layout + navigation, porte à mot de passe, client Supabase, PWA (manifest, icônes, `sw.js`), primitives `<Widget>` `<Case>` `<Jauge>`. Les 13 routes existent en ébauche. **Les 9 migrations sont appliquées.** | Build et `tsc` propres. `/` déconnecté → `/connexion`. Mauvais mot de passe → pas de cookie. **Test d'altération : modifier un caractère du cookie doit déconnecter** (c'est ce qui prouve que le HMAC est réel). `/sw.js` répond 200, pas 307. Test anon sur la base. `app_today()` renvoie la date belge. Cibles ≥ 44px en 390×844. |
-| **2** | Phase 2. Habitudes : écran cochable en un tap, rattrapage 7 jours, réglages. Widgets « Le jour » et « Habitudes du jour ». Mur du mois + courbe 30/90/365 en SVG. | **Cocher à 23h55 heure belge enregistre aujourd'hui, pas demain.** Série correcte sur une habitude en semaine (ne casse pas le samedi). Score `null` sur un jour sans habitude programmée. |
-| **3** | Phase 3. Tâches et projets : Aujourd'hui (retards avec filet 2px), 7 prochains jours, Toutes, report en un tap, sous-tâches, récurrences, **import CSV**. Projets avec avancement et jours restants. 4 widgets. | Tâche mensuelle née le 31 → 31 jan / 28 fév / 31 mars, sans dérive. Quotidienne en retard de 8 jours → **une** occurrence, demain. Double tape → une seule. Import d'un CSV à point-virgule + dates `JJ/MM/AAAA`, puis annulation du lot. |
-| **4** | Phase 4. Finances : comptes, ajustement de solde, saisie rapide, virements, mois en argent, dépenses par catégorie en barres SVG, paiements à venir, budgets. 3 widgets. | Rapprochement → l'écart vaut exactement la différence et le solde égale le nombre saisi. Second rapprochement à vide → « Déjà à jour », zéro ligne. Virement → deux jambes, somme nulle, net mensuel inchangé ; suppression → les deux partent. Catégorie avec un mois creux → comparaison à `0`, pas à un chiffre d'il y a deux mois. |
-| **5** | Phase 5a. Agenda (semaine, mois, tâches datées en lecture seule). Objectifs et résultats clés. Journal prérempli par le score et les tâches faites, bilans hebdo et mensuel. 2 widgets. | Résultat clé décroissant (perdre 8 kg) → progression correcte. Objectif sans résultat clé → tiret, pas 0 %. |
-| **6** | Phase 5b. Inbox et conversion, Sport, Lectures + upload de couverture, Notes + recherche, Cours, Clients (alerte > 30 jours). Réglages des widgets. **Export JSON.** | Recherche `resume` trouve « résumé ». Upload d'une couverture → image affichée. Désactiver 5 widgets → 10 rendus, sans décalage. Réordonner → persiste. |
+- lectures dans `src/lib/donnees/<domaine>.ts`, chaque export enveloppé dans
+  `cache()` (modèle : `src/lib/donnees/habitudes.ts`) ;
+- écritures dans `src/lib/actions/<domaine>.ts`, `'use server'`, chacune
+  ouvrant sur `exigerSession()` puis fermant sur `revalidatePath()` — et
+  **aucune constante exportée**, un tel fichier ne peut exporter que des
+  fonctions asynchrones (les constantes vont dans `src/lib/regles.ts`) ;
+- écran sous `src/app/(app)/<section>/page.tsx`, l'état porté par les
+  paramètres d'URL quand c'est possible, pour rester utilisable sans JavaScript ;
+- widgets dans `src/components/widgets/`, inscrits dans `registre.tsx`, chacun
+  rendant `null` quand il est vide ;
+- primitives existantes à réutiliser : `<Widget>` et `<Invitation>`, `<Case>`,
+  `<Jauge>`, `<Ligne>` (qui porte déjà le trait vertical 2px des retards),
+  `<EnTeteSection>`.
 
-**Données de démonstration :** le brief interdit toute donnée en dur *dans les
-composants* — respecté strictement. Un `supabase/seed.sql` facultatif, à exécuter
-à la main, permet de regarder l'app remplie. Aucun composant n'en dépend.
+Toute la logique délicate est **déjà en base et déjà vérifiée** : `completer_tache`,
+`passer_tache`, `enregistrer_virement`, `supprimer_virement`,
+`enregistrer_ajustement`, `payer_echeance`, et les vues `solde_compte`,
+`avancement_projet`, `progression_objectif`, `finances_mensuelles`,
+`depenses_par_categorie`, `budget_statut`. Les écrans ne doivent que les
+appeler, jamais refaire le calcul côté TypeScript.
+
+### Phase 3 — Tâches et projets
+
+Écrans `taches/` (Aujourd'hui + retards, 7 prochains jours groupés, Toutes
+filtrable), `taches/importer/`, `projets/`. Report en un tap (demain / semaine
+prochaine), sous-tâches à un niveau, complétion via `completer_tache`.
+Widgets : Tâches du jour, Retards, 7 prochains jours, Projets en cours.
+
+**Import CSV** — `src/lib/csv.ts`, analyseur RFC 4180 écrit à la main
+(guillemets, séparateurs et retours à la ligne encapsulés), détection du
+séparateur `,` `;` ou tabulation, et parcours en quatre étapes : dépôt →
+association des colonnes pré-remplie par correspondance approximative → aperçu
+des dix premières lignes sans rien écrire → import. Format de date deviné puis
+modifiable, `JJ/MM/AAAA` par défaut. Chaque lot porte un `import_batch_id`,
+donc un import raté se défait d'une tape.
+
+### Phase 4 — Finances
+
+Écrans `argent/` (total net et solde par compte), `argent/comptes/[id]`,
+`argent/rapprocher/[id]`, `argent/virement`, `argent/echeances`,
+`argent/budgets`. Saisie de transaction en moins de cinq secondes.
+`src/lib/argent.ts` pour l'analyse (`1 234,56` comme `1234.56`) et le formatage
+en `Intl.NumberFormat('fr-BE')`. Barres SVG horizontales écrites à la main pour
+les dépenses par catégorie. Dépassement de budget rendu par inversion de ligne.
+Widgets : Comptes, Le mois en argent, Paiements à venir.
+
+Le rapprochement affiche l'écart en direct pendant la saisie, mais **c'est le
+serveur qui fait foi** : il recalcule et renvoie l'écart réel. Écart nul → « Déjà
+à jour », aucune ligne. Les lignes d'ajustement ne sont pas modifiables.
+
+### Phase 5a — Agenda, objectifs, journal
+
+Agenda en vues semaine et mois, les tâches datées y apparaissent en lecture
+seule. Objectifs et résultats clés avec progression calculée par la base.
+Journal du jour prérempli par le score d'habitudes et les tâches terminées,
+bilans hebdomadaire et mensuel dérivés des entrées.
+Widgets : Agenda, Objectifs en cours.
+
+### Phase 5b — Le reste
+
+Inbox (un champ, un bouton) et conversion en tâche / note / dépense /
+événement. Sport, Lectures avec upload de couverture vers le bucket
+`couvertures`, Notes avec recherche plein texte française, Cours, Clients avec
+alerte au-delà de 30 jours sans contact. Panneau de réglage des widgets
+(activer, désactiver, réordonner). **Export JSON** dans `reglages/export` —
+l'offre gratuite Supabase n'a aucune sauvegarde automatique, et ce serait
+l'unique copie d'une année de journal.
+
+### Données de démonstration
+
+Le brief interdit toute donnée en dur *dans les composants* — respecté
+strictement. Un `supabase/seed.sql` facultatif, exécuté à la main, permet de
+regarder l'application remplie. Aucun composant n'en dépend.
 
 ### Performance
 
@@ -428,39 +522,47 @@ autonome sous son propre `<Suspense>`, ses lectures enveloppées dans `cache()`
 
 ---
 
-## Vérification finale
+## Vérification
 
-- `npm run build`, `npx tsc --noEmit`, `npm run lint` propres.
-- Assertion ciblée sur le CSS généré : `rounded-lg` et `shadow-md` **n'existent
-  pas** dans la sortie (c'est ce qui prouve que la neutralisation des espaces de
-  noms Tailwind a pris, un build vert ne le dirait pas).
-- Parcours réels au navigateur (Chromium préinstallé, Playwright) une fois vos
-  clés en place : connexion, cochage d'habitude, ajustement de solde, virement,
-  report de tâche, import CSV.
-- Captures en clair et en sombre pour contrôler polices, échelle typographique,
-  absence de rayon et d'ombre.
-- Grep de non-régression : aucun `current_date`, aucun `toISOString().slice`.
+### Dans cette session, à chaque phase
 
-## Ce dont j'ai besoin de vous
+- `npm run verifier` — `tsc --noEmit`, `eslint`, `next build`.
+- `npm run verifier:sql` — les 9 migrations sur une base neuve plus les
+  contrôles de logique. **Chaque phase y ajoute les siens** : report de tâche,
+  sous-tâches, import et annulation d'un lot, saisie de transaction,
+  rapprochement, paiement d'échéance, budgets, progression d'objectif,
+  recherche plein texte. C'est la seule vérification de comportement possible
+  ici, et elle couvre la partie la plus risquée.
+- Grep de non-régression : aucun `current_date` en SQL, aucun
+  `toISOString().slice` en TypeScript.
+- Régénérer `src/lib/supabase/database.types.ts` (`npm run types`) après toute
+  migration, et vérifier que les écrans compilent contre les nouveaux types.
 
-1. Créez le projet sur supabase.com, **région `eu-central-1` (Frankfurt)** — même
-   région que le déploiement Vercel (`fra1`).
-2. Project Settings → API : collez-moi `Project URL` et la clé `service_role`.
-3. Choisissez le mot de passe de l'application (24 caractères ou plus — c'est un
-   secret unique sans limitation de tentatives côté Supabase ; le délai fixe de
-   400 ms couvre le reste).
+### Dans un environnement au réseau autorisé
 
-Je m'occupe des migrations, du bucket Storage et du `.env.local` (ignoré par git,
-la clé n'ira jamais dans le dépôt).
+Ce qui reste en dette et se solde là-bas :
 
-Rien ne bloque le démarrage : je crée le dépôt et j'attaque la phase 1
-immédiatement, les clés ne sont nécessaires qu'à la fin de celle-ci.
+1. Appliquer les 9 migrations, créer le bucket public `couvertures`.
+2. `npm run verifier:parcours` — les 23 contrôles de la phase 1 doivent
+   repasser au vert contre la vraie base.
+3. Parcours réels : cocher une habitude à 23h55 heure belge et vérifier
+   qu'elle tombe le bon jour ; compléter une tâche récurrente en retard ;
+   rapprocher un solde ; faire puis supprimer un virement ; importer un CSV à
+   point-virgule avec dates `JJ/MM/AAAA` puis annuler le lot.
+4. Contrôle de sécurité avec la clé *anon* :
+   `curl "$SUPABASE_URL/rest/v1/solde_compte?select=*" -H "apikey: $ANON"`
+   doit refuser. S'il renvoie des données, le `security_invoker` de `0007`
+   n'a pas pris.
 
 ### Déploiement Vercel, à la fin
 
-Importer `pignon-sur-web/deuxieme-cerveau`, **Root Directory = racine**, région
-`fra1`, et les quatre variables : `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
-`APP_PASSWORD`, `AUTH_SECRET`.
+Importer le dépôt, **Root Directory = `deuxieme-cerveau`** tant que le code vit
+dans le sous-dossier d'upptime, région `fra1`, et les quatre variables :
+`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `APP_PASSWORD`, `AUTH_SECRET`.
+
+⚠️ La clé `sb_secret_…` communiquée dans la conversation doit être **révoquée**
+(Supabase → Project Settings → API Keys → *Rotate*). Elle n'a jamais servi,
+l'environnement n'ayant pas pu joindre Supabase.
 
 ## Points de vigilance suivis
 
