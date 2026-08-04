@@ -3,6 +3,11 @@ import { LeJour } from './LeJour'
 import { HabitudesDuJour } from './HabitudesDuJour'
 import { CourbeHabitudesWidget, MurDuMoisWidget } from './MurDuMoisWidget'
 import {
+  ComptesWidget,
+  MoisEnArgentWidget,
+  PaiementsAVenirWidget,
+} from './Finances'
+import {
   ProjetsEnCoursWidget,
   RetardsWidget,
   SeptJoursWidget,
@@ -54,6 +59,9 @@ export const WIDGETS: readonly DefinitionWidget[] = [
   { cle: 'taches_du_jour', libelle: "Tâches d'aujourd'hui", Composant: TachesDuJourWidget },
   { cle: 'retards', libelle: 'Retards', Composant: RetardsWidget },
   { cle: 'sept_jours', libelle: 'Les 7 prochains jours', Composant: SeptJoursWidget },
+  { cle: 'comptes', libelle: 'Comptes', Composant: ComptesWidget },
+  { cle: 'mois_en_argent', libelle: 'Le mois en argent', Composant: MoisEnArgentWidget },
+  { cle: 'paiements_a_venir', libelle: 'Paiements à venir', Composant: PaiementsAVenirWidget },
   { cle: 'projets_en_cours', libelle: 'Projets en cours', Composant: ProjetsEnCoursWidget },
   { cle: 'mur_du_mois', libelle: 'Le mur du mois', Composant: MurDuMoisWidget },
   { cle: 'courbe_habitudes', libelle: 'Courbe des habitudes', Composant: CourbeHabitudesWidget },

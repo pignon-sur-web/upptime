@@ -15,7 +15,8 @@
     "verifier:da": "node scripts/verifier-da.mjs",
     "verifier:sql": "bash scripts/verifier-sql.sh",
     "types": "node scripts/generer-types.mjs",
-    "verifier:csv": "node --experimental-strip-types scripts/verifier-csv.mjs"
+    "verifier:csv": "node --experimental-strip-types scripts/verifier-csv.mjs",
+    "verifier:argent": "node --experimental-strip-types scripts/verifier-argent.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.111.0",

@@ -345,6 +345,51 @@ begin
 end $$;
 
 do $$
+declare
+  c uuid; e uuid; v_tx uuid; v_solde bigint; v_suivante date; v_nb integer;
+begin
+  delete from public.transactions;
+  delete from public.upcoming_payments;
+  delete from public.accounts;
+
+  insert into public.accounts (name, opening_balance_cents) values ('Courant', 200000)
+    returning id into c;
+
+  -- Loyer mensuel né le 31 janvier : le paiement doit créer l'écriture ET
+  -- préparer l'échéance suivante sans dérive de fin de mois.
+  insert into public.upcoming_payments
+    (name, due_date, series_origin_date, amount_cents, category, account_id, recurrence)
+  values ('Loyer', date '2026-01-31', date '2026-01-31', 95000, 'logement', c, 'P1M')
+  returning id into e;
+
+  v_tx := public.payer_echeance(e);
+
+  select solde_cents into v_solde from public.solde_compte where account_id = c;
+  select count(*) into v_nb from public.upcoming_payments where paid_at is null;
+  select due_date into v_suivante from public.upcoming_payments where paid_at is null;
+
+  perform pg_temp.verifier(
+    'payer une échéance crée l''écriture et débite le compte',
+    v_tx is not null and v_solde = 200000 - 95000
+      and (select kind from public.transactions where id = v_tx) = 'depense',
+    'solde ' || v_solde
+  );
+
+  perform pg_temp.verifier(
+    'échéance récurrente : la suivante est préparée, au bon quantième',
+    v_nb = 1 and extract(day from v_suivante) = 31 and v_suivante > public.app_today(),
+    'prochaine échéance ' || v_suivante
+  );
+
+  perform pg_temp.verifier(
+    'payer deux fois ne double pas l''écriture',
+    public.payer_echeance(e) = v_tx
+      and (select count(*) from public.transactions where account_id = c) = 1,
+    'idempotent'
+  );
+end $$;
+
+do $$
 declare v_precedente bigint; v_mois date;
 begin
   -- Catégorie avec un mois creux : la comparaison doit se faire à 0, pas à un
