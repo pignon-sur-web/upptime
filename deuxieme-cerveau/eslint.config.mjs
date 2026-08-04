@@ -18,11 +18,15 @@ const configuration = [
       // Le fuseau est le risque numéro un de cette application : une habitude
       // cochée à 00h30 en Belgique tombe la veille en UTC. Toute notion de
       // « jour » passe par aujourdhui() dans src/lib/date.ts.
+      // La règle vise la dérivation d'un JOUR — `…toISOString().slice(0, 10)`,
+      // qui donne la date UTC et non la date belge. Un `toISOString()` seul
+      // reste légitime : c'est ainsi qu'on écrit un instant dans une colonne
+      // timestamptz, et l'instant, lui, n'a pas de fuseau.
       'no-restricted-syntax': [
         'error',
         {
           selector:
-            "MemberExpression[object.callee.name='Date'][property.name='toISOString']",
+            "CallExpression[callee.property.name='slice'][callee.object.callee.property.name='toISOString']",
           message:
             'Interdit : dériver un jour depuis toISOString(). Utiliser aujourdhui() de @/lib/date.',
         },

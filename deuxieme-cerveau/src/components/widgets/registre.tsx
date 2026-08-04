@@ -8,6 +8,12 @@ import {
   PaiementsAVenirWidget,
 } from './Finances'
 import {
+  AgendaWidget,
+  InboxWidget,
+  LectureEnCoursWidget,
+  ObjectifsEnCoursWidget,
+} from './Vie'
+import {
   ProjetsEnCoursWidget,
   RetardsWidget,
   SeptJoursWidget,
@@ -63,8 +69,12 @@ export const WIDGETS: readonly DefinitionWidget[] = [
   { cle: 'mois_en_argent', libelle: 'Le mois en argent', Composant: MoisEnArgentWidget },
   { cle: 'paiements_a_venir', libelle: 'Paiements à venir', Composant: PaiementsAVenirWidget },
   { cle: 'projets_en_cours', libelle: 'Projets en cours', Composant: ProjetsEnCoursWidget },
+  { cle: 'objectifs_en_cours', libelle: 'Objectifs en cours', Composant: ObjectifsEnCoursWidget },
   { cle: 'mur_du_mois', libelle: 'Le mur du mois', Composant: MurDuMoisWidget },
   { cle: 'courbe_habitudes', libelle: 'Courbe des habitudes', Composant: CourbeHabitudesWidget },
+  { cle: 'agenda', libelle: 'Agenda', Composant: AgendaWidget },
+  { cle: 'lecture_en_cours', libelle: 'Lecture en cours', Composant: LectureEnCoursWidget },
+  { cle: 'inbox', libelle: 'Inbox', Composant: InboxWidget },
 ]
 
 export const WIDGET_PAR_CLE = new Map(WIDGETS.map((w) => [w.cle, w]))
